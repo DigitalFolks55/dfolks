@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "dfolks"
+version = "0.1.0"
+description = "Data analytics platform developed by dfolks"
+authors = ["dfolks <digitalfolks55@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "dfolks", from = "src"}
+]
+
+
+[tool.poetry.dependencies]
+python = "~3.12"
+pandas = "~2.2.3"
+numpy = "~2.2.3"
+phx-class-registry = "^5.1.1"
+pydantic = "^2.10.6"
+pydantic-yaml = "^1.4.0"
+pyyaml = "^6.0.2"
+pandera = "^0.23.1"
+ipykernel = "^6.29.5"
+openpyxl = "^3.1.5"
+scikit-learn = "^1.6.1"
+class-registry = "^2.1.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "25.1.0"
+isort = "6.0.1"
+pytest = "^8.3.5"
+pytest-cov = "^6.0.0"
+pre-commit = "^4.1.0"
+mypy = "^1.15.0"
+flake8 = "7.1.2"
+
+
+[tool.isort]
+profile = "black"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
