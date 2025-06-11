@@ -2,8 +2,8 @@
 
 from typing import ClassVar
 
-from dfolks.core.classfactory import TransformerRegistery  # noqa
 from dfolks.core.classfactory import (
+    TransformerRegistery,
     WorkflowsRegistry,
     allow_overwrite_classes,
     check_registration,
@@ -12,6 +12,7 @@ from dfolks.core.classfactory import (
 
 class TstTrRegA(TransformerRegistery):
     trsclss: ClassVar[str] = "testcls1"
+    test_var: int = 0
 
     def fit(self, X, y=None):
         return X
@@ -20,9 +21,10 @@ class TstTrRegA(TransformerRegistery):
         return X
 
 
-def test_variablized_class():
-    test_class = TstTrRegA()
+def test_transformer_reg_class():
+    test_class = TstTrRegA.model_validate({"test_var": 100})
     assert test_class.trsclss == "testcls1"
+    assert test_class.test_var == 100
 
 
 def test_allow_overwrite_class():
@@ -49,16 +51,14 @@ def test_allow_overwrite_class():
 
 class TstWfRegA(WorkflowsRegistry):
     wflcls: ClassVar[str] = "testcls1"
-
-    class Variables(WorkflowsRegistry.Variables):
-        test_var: int
+    test_var: int
 
     def run(self):
         return self.wflcls
 
 
 def test_workflow_registry():
-    test_class = TstWfRegA(**{"test_var": 100})
+    test_class = TstWfRegA.model_validate({"test_var": 100})
     assert test_class.wflcls == "testcls1"
 
 

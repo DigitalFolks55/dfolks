@@ -1,11 +1,15 @@
-"""classfactory base class.
+"""classfactory base classes.
+1) TransformerRegistery: base class for customized transformer.
+2) WorkflowsRegistry: base class for workflow.
 
 Key libraries:
 pydantic: parsing and validating variables.
-ClassRegistry: managing class - register to avoid collision
+ClassRegistry: managing class - register to avoid collision.
+ABC: absract base class for defining abstract methods.
+BaseEstimator and TransformerMixin: scikit-learn base classes for transformers.
 
 Need to work:
-0) more attributes for base class
+0) more attributes for base classes
 1) documentation
 2) update
 """
@@ -14,16 +18,16 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Dict, Optional
 
 from class_registry import ClassRegistry
 from class_registry.base import AutoRegister
 from pydantic import BaseModel
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from dfolks.core.module import import_all_submodules, set_logger
+from dfolks.core.utils import import_all_submodules, set_logger
 
-# Class registry, all sub-classes will be stored at "rclss" and not allow duplication.
+# Class registry, all sub-classes will be stored at attr_name and not allow duplication.
 __reg_transformer_cls__ = ClassRegistry(attr_name="trsclss", unique=True)
 __reg_workflow_cls__ = ClassRegistry(attr_name="wflcls", unique=True)
 
@@ -36,13 +40,35 @@ def allow_overwrite_classes():
 
 
 class TransformerRegistery(
-    AutoRegister(__reg_transformer_cls__), ABC, BaseEstimator, TransformerMixin
+    AutoRegister(__reg_transformer_cls__),
+    ABC,
+    BaseEstimator,
+    TransformerMixin,
+    BaseModel,
 ):
     """Base class for customized transformer.
 
     Inherited class must have following values
     1) trsclss: class registration.
+
+    Key methods
+    ----------
+    variables: Return variables of the workflow.
+    ----------
+
+    Key methods
+    ----------
+    fit: Abstract method.
+        Performing fit.
+    transform: Abstract method.
+        Performing transformation.
+    ----------
     """
+
+    @property
+    def variables(self) -> Dict:
+        """Return Variables of a pydantic model."""
+        return self.model_dump()
 
     @abstractmethod
     def fit(self, X, y=None):
@@ -55,14 +81,18 @@ class TransformerRegistery(
         raise NotImplementedError("transform method not implemented")
 
 
-class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC):
+class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
     """Workflow base class.
+
+    Inherited class must have following values
+    1) wflcls: class registration.
 
     Key methods
     ----------
     run: Abstract method.
         Execute overall workflow. To be implemented at subclasses.
     logger: set up a logger for workflow.
+    variables: Return variables of the workflow.
     ----------
 
     Variables
@@ -75,13 +105,6 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC):
 
     log_level: Optional[str] = "INFO"
     log_path: Optional[str] = None
-
-    class Variables(BaseModel):
-        """Variables for the workflow."""
-
-    def __init__(self, **kwargs):
-        """Initialize the workflow."""
-        self.variables = self.Variables(**kwargs)
 
     @abstractmethod
     def run(self) -> None:
@@ -96,6 +119,11 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC):
         level = getattr(logging, v["log_level"])
         log = set_logger(name, level, v["log_path"])
         return log
+
+    @property
+    def variables(self) -> Dict:
+        """Return Variables of a pydantic model."""
+        return self.model_dump()
 
 
 def check_registration():
