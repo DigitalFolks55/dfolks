@@ -8,6 +8,7 @@ Need to do:
 import tempfile
 import unittest
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 import yaml
@@ -27,6 +28,7 @@ from dfolks.data.output import (
 class TstParser(AbstractParser):
     """Test parser class."""
 
+    prcls: ClassVar[str] = "TestParser"
     path: str = None
     load_all: bool = None
 
