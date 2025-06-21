@@ -1,10 +1,17 @@
-"""Test for data."""
+"""Test for data.
+
+Need to do:
+0) Change it to unittest.
+1) Add tests of input.py with different file types.
+1) Add tests of output.py with mocking paths.
+2) Add tests of dataprep.py.
+"""
 
 import pandas as pd
 import yaml
 
+from dfolks.core.classfactory import AbstractParser
 from dfolks.data.data import (
-    AbstractParser,
     Validator,
 )
 from dfolks.data.input import (
