@@ -128,7 +128,7 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
         return self.model_dump()
 
 
-class AbstractParser(ABC, BaseModel):
+class AbstractParser(AutoRegister(__reg_parser_cls__), ABC, BaseModel):
     """Abstract parser for data ingestion.
 
     Key methods

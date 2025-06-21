@@ -22,7 +22,7 @@ class SimpleParser(AbstractParser):
     ----------
     """
 
-    rclss: ClassVar[str] = "SimpleParser"
+    prcls: ClassVar[str] = "SimpleParser"
 
     source: str
     source_path: str
