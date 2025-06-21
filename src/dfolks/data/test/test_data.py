@@ -1,11 +1,13 @@
 """Test for data.
 
 Need to do:
-0) Change it to unittest.
-1) Add tests of input.py with different file types.
-1) Add tests of output.py with mocking paths.
-2) Add tests of dataprep.py.
+0) Add tests of input.py with different file types.
+1) Add tests of output.py for parquet when we enable the function of saving to parquet.
 """
+
+import tempfile
+import unittest
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -16,6 +18,9 @@ from dfolks.data.data import (
 )
 from dfolks.data.input import (
     load_flat_file,
+)
+from dfolks.data.output import (
+    save_to_flatfile,
 )
 
 
@@ -37,35 +42,86 @@ class TstParser(AbstractParser):
         return parsed_df
 
 
-def test_parser_class():
-    """Test for parser class."""
-    expected_output = pd.DataFrame({"Column1": ["A", "B", "C"], "Column2": [1, 2, 3]})
-    schema_yaml = """
-    schemas:
-        "Column1":
-            type: str
-            nullable: false
-            unique: true
-        "Column2":
-            type: str
-            nullable: false
-            unique: true
-    """
-    schema_dict = yaml.safe_load(schema_yaml)
-    expected_parsed_output = pd.DataFrame(
-        {"Column1": ["A", "B", "C"], "Column2": ["1", "2", "3"]}
-    )
+class TestParserCls(unittest.TestCase):
+    """Test abstract parser class."""
 
-    test_parser = TstParser.model_validate(
-        {"path": "src/dfolks/data/test/dummy.csv", "load_all": False}
-    )
-    test_validator = Validator.model_validate(schema_dict)
+    def setUp(self):
+        self.expected_output = pd.DataFrame(
+            {"Column1": ["A", "B", "C"], "Column2": [1, 2, 3]}
+        )
 
-    assert isinstance(test_parser, AbstractParser)
-    pd.testing.assert_frame_equal(test_parser.load(), expected_output)
-    pd.testing.assert_frame_equal(test_parser.parse(), expected_output)
+        self.expected_parsed_output = pd.DataFrame(
+            {"Column1": ["A", "B", "C"], "Column2": ["1", "2", "3"]}
+        )
 
-    assert isinstance(test_validator, Validator)
-    pd.testing.assert_frame_equal(
-        test_validator.valid(test_parser.parse()), expected_parsed_output
-    )
+        self.schema_yaml = """
+        schemas:
+            "Column1":
+                type: str
+                nullable: false
+                unique: true
+            "Column2":
+                type: str
+                nullable: false
+                unique: true
+        """
+        self.schema_dict = yaml.safe_load(self.schema_yaml)
+
+        self.test_parser = TstParser.model_validate(
+            {"path": "src/dfolks/data/test/dummy.csv", "load_all": False}
+        )
+
+        self.test_validator = Validator.model_validate(self.schema_dict)
+
+    def test_is_instance(self):
+        self.assertIsInstance(self.test_parser, AbstractParser)
+        self.assertIsInstance(self.test_validator, Validator)
+
+    def test_load_method(self):
+        pd.testing.assert_frame_equal(self.test_parser.load(), self.expected_output)
+
+    def test_parse_method(self):
+        pd.testing.assert_frame_equal(self.test_parser.parse(), self.expected_output)
+
+    def test_validation(self):
+        validated_df = self.test_validator.valid(self.test_parser.parse())
+        pd.testing.assert_frame_equal(validated_df, self.expected_parsed_output)
+
+
+class TestSaveToFlatFile(unittest.TestCase):
+    """Test"""
+
+    def setUp(self):
+        self.df = pd.DataFrame({"Column1": ["A", "B", "C"], "Column2": [1, 2, 3]})
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.temp_path = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_save_to_flatfile_with_db(self):
+        db = "test_db"
+        table = "test_table"
+        expected_file = self.temp_path / "FlatHive" / db / f"{table}.csv"
+
+        with unittest.mock.patch("dfolks.data.output.__user_dic__", self.temp_path):
+            save_to_flatfile(df=self.df, db=db, path=table, type="csv")
+
+        self.assertTrue(expected_file.exists())
+
+        # Check if the file was created
+        loaded_df = pd.read_csv(expected_file)
+        self.assertTrue(loaded_df.equals(self.df))
+
+    def test_save_to_flatfile_without_db(self):
+        out_file = self.temp_path / "output.csv"
+        save_to_flatfile(self.df, db=None, path=str(out_file))
+
+        self.assertTrue(out_file.exists())
+
+        loaded_df = pd.read_csv(out_file)
+        self.assertTrue(loaded_df.equals(self.df))
+
+
+if __name__ == "__main__":
+    unittest.main()
