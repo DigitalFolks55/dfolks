@@ -29,6 +29,7 @@ class TstParser(AbstractParser):
     """Test parser class."""
 
     prcls: ClassVar[str] = "TestParser"
+
     path: str = None
     load_all: bool = None
 
