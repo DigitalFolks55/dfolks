@@ -1,4 +1,4 @@
-"""Test for variablized class."""
+"""Test for utils."""
 
 import logging
 import sys

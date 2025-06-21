@@ -30,6 +30,7 @@ from dfolks.core.utils import import_all_submodules, set_logger
 # Class registry, all sub-classes will be stored at attr_name and not allow duplication.
 __reg_transformer_cls__ = ClassRegistry(attr_name="trsclss", unique=True)
 __reg_workflow_cls__ = ClassRegistry(attr_name="wflcls", unique=True)
+__reg_parser_cls__ = ClassRegistry(attr_name="prcls", unique=True)
 
 
 def allow_overwrite_classes():
@@ -37,6 +38,7 @@ def allow_overwrite_classes():
     global __reg_transformer_cls__, __reg_workflow_cls__
     __reg_transformer_cls__.unique = False
     __reg_workflow_cls__.unique = False
+    __reg_parser_cls__.unique = False
 
 
 class TransformerRegistery(
@@ -119,6 +121,34 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
         level = getattr(logging, v["log_level"])
         log = set_logger(name, level, v["log_path"])
         return log
+
+    @property
+    def variables(self) -> Dict:
+        """Return Variables of a pydantic model."""
+        return self.model_dump()
+
+
+class AbstractParser(ABC, BaseModel):
+    """Abstract parser for data ingestion.
+
+    Key methods
+    ----------
+    load: Abstract method to load data from a file or files in a directory
+        This should be implemented at subclasses.
+    parse: Abstract method to parse an ingested data.
+        This should be implemented at subclasses.
+    ----------
+    """
+
+    @abstractmethod
+    def load():
+        "Load method. This should be implemented at subclasses."
+        raise NotImplementedError()
+
+    @abstractmethod
+    def parse():
+        "Parse method. This should be implemented at subclasses."
+        raise NotImplementedError()
 
     @property
     def variables(self) -> Dict:

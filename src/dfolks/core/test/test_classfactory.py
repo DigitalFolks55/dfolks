@@ -1,4 +1,4 @@
-"""Test for variablized class."""
+"""Test for classfactory."""
 
 from typing import ClassVar
 
