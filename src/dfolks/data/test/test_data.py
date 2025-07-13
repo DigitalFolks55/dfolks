@@ -70,25 +70,40 @@ class TestParserCls(unittest.TestCase):
         """
         self.schema_dict = yaml.safe_load(self.schema_yaml)
 
-        self.test_parser = TstParser.model_validate(
-            {"path": "src/dfolks/data/test/dummy.csv", "load_all": False}
+        self.test_parser_csv = TstParser.model_validate(
+            {"path": "src/dfolks/data/test/dummy/dummy.csv", "load_all": False}
+        )
+
+        self.test_parser_xlsx = TstParser.model_validate(
+            {"path": "src/dfolks/data/test/dummy/dummy.xlsx", "load_all": False}
         )
 
         self.test_validator = Validator.model_validate(self.schema_dict)
 
     def test_is_instance(self):
-        self.assertIsInstance(self.test_parser, AbstractParser)
+        self.assertIsInstance(self.test_parser_csv, AbstractParser)
+        self.assertIsInstance(self.test_parser_xlsx, AbstractParser)
         self.assertIsInstance(self.test_validator, Validator)
 
     def test_load_method(self):
-        pd.testing.assert_frame_equal(self.test_parser.load(), self.expected_output)
+        pd.testing.assert_frame_equal(self.test_parser_csv.load(), self.expected_output)
+        pd.testing.assert_frame_equal(
+            self.test_parser_xlsx.load(), self.expected_output
+        )
 
     def test_parse_method(self):
-        pd.testing.assert_frame_equal(self.test_parser.parse(), self.expected_output)
+        pd.testing.assert_frame_equal(
+            self.test_parser_csv.parse(), self.expected_output
+        )
+        pd.testing.assert_frame_equal(
+            self.test_parser_xlsx.parse(), self.expected_output
+        )
 
     def test_validation(self):
-        validated_df = self.test_validator.valid(self.test_parser.parse())
-        pd.testing.assert_frame_equal(validated_df, self.expected_parsed_output)
+        validated_df_csv = self.test_validator.valid(self.test_parser_csv.parse())
+        validated_df_xlsx = self.test_validator.valid(self.test_parser_xlsx.parse())
+        pd.testing.assert_frame_equal(validated_df_csv, self.expected_parsed_output)
+        pd.testing.assert_frame_equal(validated_df_xlsx, self.expected_parsed_output)
 
 
 class TestSaveToFlatFile(unittest.TestCase):
@@ -124,6 +139,14 @@ class TestSaveToFlatFile(unittest.TestCase):
 
         loaded_df = pd.read_csv(out_file)
         self.assertTrue(loaded_df.equals(self.df))
+
+
+def test_load_files_from_dir():
+    path = "src/dfolks/data/test/dummy/"
+    df = load_flat_file(path=path, load_all=True)
+
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
 
 
 if __name__ == "__main__":
