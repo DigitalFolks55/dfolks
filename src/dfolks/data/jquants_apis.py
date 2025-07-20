@@ -3,10 +3,13 @@
 Need to do
 0) Enable pydantic to validate variables.
 1) Add more apis.
+2) Add loggers with HTTP status codes.
 """
 
+import datetime
 import json
 import os
+import pickle
 from pathlib import Path
 
 import pandas as pd
@@ -22,7 +25,6 @@ load_dotenv(dotenv_path=env_path)
 
 def get_jquants_api_refresh_token() -> str:
     """Get J-Quants API refesh token."""
-    os.getenv("JQUANTS_API_REFRESH_TOKEN")
     data = {
         "mailaddress": os.getenv("JQUANTS_API_EMAIL_ADDRESS"),
         "password": os.getenv("JQUANTS_API_PASSWORD"),
@@ -58,6 +60,47 @@ def get_jquants_api_token(refreshToken: str = None) -> str:
         )
 
     return idToken
+
+
+def update_jquants_tokens(save_as_file=True) -> str:
+    """Get J-Quants API token."""
+    jquants_token_path = os.getenv("JQUANTS_TOKEN_PATH")
+    now = datetime.datetime.now()
+
+    if os.path.exists(jquants_token_path):
+        with open(jquants_token_path, "rb") as f:
+            tokens = pickle.load(f)
+            refreshToken_datetime = tokens.get("refreshToken").get("datetime")
+            refreshToken = tokens.get("refreshToken").get("token")
+            idToken_datetime = tokens.get("idToken").get("datetime")
+            idToken = tokens.get("idToken").get("token")
+
+        if (now - refreshToken_datetime).days >= 6:
+            # If the refresh token is still valid, return the existing tokens
+            refreshToken = get_jquants_api_refresh_token()
+        if (now - idToken_datetime).total_seconds() >= 60 * 60 * 23:
+            # If the id token is expired, get a new one
+            idToken = get_jquants_api_token(refreshToken)
+    else:
+        refreshToken = get_jquants_api_refresh_token()
+        idToken = get_jquants_api_token(refreshToken)
+
+    if save_as_file:
+        tokens = {
+            "refreshToken": {
+                "datetime": now,
+                "token": refreshToken,
+            },
+            "idToken": {
+                "datetime": now,
+                "token": idToken,
+            },
+        }
+
+        with open(jquants_token_path, "wb") as f:
+            pickle.dump(tokens, f)
+
+    return refreshToken, idToken
 
 
 def get_jquants_corporate_list(idToken: str) -> list:

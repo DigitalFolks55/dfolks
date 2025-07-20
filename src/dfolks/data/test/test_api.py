@@ -3,9 +3,14 @@
 Need to do:
 """
 
+import datetime
+import os
+import pickle
+import tempfile
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 
 from dfolks.data.jquants_apis import (
     get_jquants_api_refresh_token,
@@ -13,6 +18,7 @@ from dfolks.data.jquants_apis import (
     get_jquants_corporate_list,
     get_jquants_fin_report,
     get_jquants_stock_price,
+    update_jquants_tokens,
 )
 
 
@@ -105,3 +111,68 @@ def test_get_jquants_stock_price(mock_get):
     assert df["Date"].iloc[0] == "2023-01-01"
     assert df["Open"].iloc[0] == 100
     assert df["Close"].iloc[0] == 110
+
+
+@pytest.fixture
+def expired_tokens():
+    now = datetime.datetime.now()
+    return {
+        "refreshToken": {
+            "datetime": now - datetime.timedelta(days=7),
+            "token": "expired_refresh",
+        },
+        "idToken": {
+            "datetime": now - datetime.timedelta(hours=24),
+            "token": "expired_id",
+        },
+    }
+
+
+@patch("dfolks.data.jquants_apis.get_jquants_api_refresh_token")
+@patch("dfolks.data.jquants_apis.get_jquants_api_token")
+def test_update_with_existing_expired_tokens(
+    mock_get_id, mock_get_refresh, expired_tokens, monkeypatch
+):
+    mock_get_refresh.return_value = "mock_refresh_token"
+    mock_get_id.return_value = "mock_id_token"
+
+    # Write expired tokens to simulate existing file
+    with tempfile.TemporaryDirectory() as tmpdir:
+        token_path = os.path.join(tmpdir, "new_token.pkl")
+        monkeypatch.setenv("JQUANTS_TOKEN_PATH", token_path)
+
+        with open(token_path, "wb") as f:
+            pickle.dump(expired_tokens, f)
+
+        refresh, id_ = update_jquants_tokens(save_as_file=True)
+
+        assert refresh == "mock_refresh_token"
+        assert id_ == "mock_id_token"
+
+        # Check updated tokens were saved
+        with open(token_path, "rb") as f:
+            saved = pickle.load(f)
+        assert saved["refreshToken"]["token"] == "mock_refresh_token"
+        assert saved["idToken"]["token"] == "mock_id_token"
+
+
+@patch("dfolks.data.jquants_apis.get_jquants_api_refresh_token")
+@patch("dfolks.data.jquants_apis.get_jquants_api_token")
+def test_update_without_existing_file(mock_get_id, mock_get_refresh, monkeypatch):
+    mock_get_refresh.return_value = "new_refresh_token"
+    mock_get_id.return_value = "new_id_token"
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        token_path = os.path.join(tmpdir, "new_token.pkl")
+        monkeypatch.setenv("JQUANTS_TOKEN_PATH", token_path)
+
+        refresh, id_ = update_jquants_tokens(save_as_file=True)
+
+        assert refresh == "new_refresh_token"
+        assert id_ == "new_id_token"
+        assert os.path.exists(token_path)
+
+        with open(token_path, "rb") as f:
+            tokens = pickle.load(f)
+        assert tokens["refreshToken"]["token"] == "new_refresh_token"
+        assert tokens["idToken"]["token"] == "new_id_token"

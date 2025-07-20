@@ -1,0 +1,8 @@
+# Sample of env file
+# Location env/.env (create a folder env directory and store .env file there)
+
+DATA_HIVE_DIR = "*****/****"
+
+JQUANTS_API_EMAIL_ADDRESS = "****@***.com"
+JQUANTS_API_PASSWORD = "*****"
+JQUANTS_TOKEN_PATH = "***/***/jquants_tokens.pickle"
