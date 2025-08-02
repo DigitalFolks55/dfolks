@@ -1,0 +1,60 @@
+name: Continuous Integration
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Conda packages
+      uses: actions/cache@v4
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
+
+    - name: Setup Conda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: ci-env
+        environment-file: environment.yml
+        python-version: "3.12"  # As of 2025/8 only Python 3.12 is supported
+        auto-activate-base: false
+        use-mamba: true
+
+    - name: Cache Poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+
+    - name: Install Poetry
+      run: |
+        pip install poetry
+        poetry config virtualenvs.create false
+
+    - name: Install dependencies (with dev)
+      run: |
+        poetry install --with dev --no-interaction --no-root
+
+    - name: Lint with Black
+      run: black --check .
+
+    - name: Lint with isort
+      run: isort --check-only --diff .
+
+    - name: Lint with flake8
+      run: flake8 .
+
+    - name: Run pytest
+      run: pytest --maxfail=1 --disable-warnings -q
