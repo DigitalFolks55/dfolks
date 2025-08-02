@@ -41,7 +41,6 @@ jobs:
     - name: Install Poetry
       run: |
         pip install poetry
-        poetry config virtualenvs.create false
 
     - name: Install dependencies (with dev)
       run: |
