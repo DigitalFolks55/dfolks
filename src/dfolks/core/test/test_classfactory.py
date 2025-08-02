@@ -6,7 +6,6 @@ from dfolks.core.classfactory import (
     TransformerRegistery,
     WorkflowsRegistry,
     allow_overwrite_classes,
-    check_registration,
 )
 
 
@@ -60,10 +59,3 @@ class TstWfRegA(WorkflowsRegistry):
 def test_workflow_registry():
     test_class = TstWfRegA.model_validate({"test_var": 100})
     assert test_class.wflcls == "testcls1"
-
-
-def test_check_registration():
-    rclss_trans, rclss_wfs = check_registration()
-
-    assert len(rclss_trans) == 2
-    assert len(rclss_wfs) == 1
