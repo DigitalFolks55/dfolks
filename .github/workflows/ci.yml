@@ -44,7 +44,7 @@ jobs:
 
     - name: Install dependencies (with dev)
       run: |
-        poetry install --with dev --no-interaction --no-root
+        poetry install --with dev
 
     - name: Lint with Black
       run: poetry run black --check .
