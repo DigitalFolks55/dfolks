@@ -2,7 +2,7 @@
 
 Need to do
 1) Meta file - schema, format; pandas, created date, sample
-2) update, archive, remove
+2) update (incremental, upsert, overwrite etc..), archive, remove
 2) other flat, media & model hive
 3) pyspark hive & other formats like arvo, orc
 4) doc
