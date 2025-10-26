@@ -4,7 +4,7 @@
 
 Related issue #:
 
-Please include the context of the deveolopment.
+Please include the context of the development.
 
 ## Summary of changes
 
@@ -17,8 +17,8 @@ Please include a summary of what you have been implemented as a new feature.
 
 ## Tests
 
-- [ ] Manually tested.
-- [ ] Pytest/Unitest passed (Coverage >70% at least).
+- [] Manually tested.
+- [] Pytest/Unitest passed (Coverage >70% at least).
 
 ## CICD Progress
 
