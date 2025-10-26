@@ -213,7 +213,10 @@ def test_get_edinet_document_list(mock_get):
     mock_get.return_value.status_code = 200
 
     date = "2025-01-01"
-    df = get_edinet_document_list(date)
+    # Patch environment variable for the test
+    with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+        df = get_edinet_document_list(date)
+
     assert isinstance(df, pd.DataFrame)
     assert not df.empty
     assert df.shape[0] == 1
