@@ -1,0 +1,6 @@
+[run]
+source = src/dfolks
+omit =
+    src/dfolks/workflows/*
+    */src/dfolks/workflows/*
+    */dfolks/workflows/*

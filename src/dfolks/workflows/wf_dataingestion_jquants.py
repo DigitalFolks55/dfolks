@@ -6,6 +6,7 @@ Need to work:
 """
 
 import logging
+import time
 from typing import ClassVar, List, Optional
 
 import pandas as pd
@@ -78,6 +79,7 @@ class DataIngestionJQuants(WorkflowsRegistry):
                 fin_report, stock_price = self.fetch_data(id_token, code)
                 fin_reports.append(fin_report)
                 stock_prices.append(stock_price)
+                time.sleep(1)  # To avoid hitting rate limits
 
             fin_reports_df = pd.concat(fin_reports, ignore_index=True)
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
@@ -89,6 +91,7 @@ class DataIngestionJQuants(WorkflowsRegistry):
                 fin_report, stock_price = self.fetch_data(id_token, code)
                 fin_reports.append(fin_report)
                 stock_prices.append(stock_price)
+                time.sleep(1)  # To avoid hitting rate limits
 
             fin_reports_df = pd.concat(fin_reports, ignore_index=True)
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
@@ -98,10 +101,16 @@ class DataIngestionJQuants(WorkflowsRegistry):
             return fin_reports_df, stock_prices_df
         elif v["format"] == "csv":
             logger.info("Saving DataFrame to CSV format.")
-            save_to_flatfile(
-                df=fin_reports_df, db=v["target_db"], path=v["target_path_fin_report"]
-            )
-            save_to_flatfile(
-                df=stock_prices_df, db=v["target_db"], path=v["target_path_stock"]
-            )
+            if v["target_path_fin_report"]:
+                save_to_flatfile(
+                    df=fin_reports_df,
+                    db=v["target_db"],
+                    path=v["target_path_fin_report"],
+                )
+            if v["target_path_stock"]:
+                save_to_flatfile(
+                    df=stock_prices_df, db=v["target_db"], path=v["target_path_stock"]
+                )
             logger.info("Data saved to CSV format.")
+            if not v["target_path_fin_report"] and not v["target_path_stock"]:
+                logger.error("No path defined!")

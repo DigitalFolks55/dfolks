@@ -172,4 +172,13 @@ def check_registration():
     for name, cls in registered_classes_workflows.items():
         print(f"{name}: {cls}")
 
-    return registered_classes_transformer, registered_classes_workflows
+    registered_classes_parsers = __reg_parser_cls__._registry
+    print("Registered Workflow Classes:")
+    for name, cls in registered_classes_parsers.items():
+        print(f"{name}: {cls}")
+
+    return (
+        registered_classes_transformer,
+        registered_classes_workflows,
+        registered_classes_parsers,
+    )
