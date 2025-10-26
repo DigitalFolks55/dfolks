@@ -25,6 +25,9 @@ scikit-learn = "^1.6.1"
 class-registry = "^2.1.2"
 python-dotenv = "^1.1.1"
 requests = "^2.32.4"
+python-xbrl = "^1.1.1"
+beautifulsoup4 = "^4.13.4"
+arelle-release = "^2.37.60"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -33,7 +36,6 @@ isort = "6.0.1"
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
 pre-commit = "^4.1.0"
-mypy = "^1.15.0"
 flake8 = "7.1.2"
 
 

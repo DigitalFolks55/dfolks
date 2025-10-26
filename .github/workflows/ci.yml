@@ -17,11 +17,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Cache Conda packages
-      uses: actions/cache@v4
-      with:
-        path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
+    # - name: Cache Conda packages
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: ~/conda_pkgs_dir
+    #     key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
 
     - name: Setup Conda
       uses: conda-incubator/setup-miniconda@v3
@@ -32,11 +32,11 @@ jobs:
         auto-activate-base: false
         use-mamba: true
 
-    - name: Cache Poetry
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pypoetry
-        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+    # - name: Cache Poetry
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: ~/.cache/pypoetry
+    #     key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
 
     - name: Install Poetry
       run: |
