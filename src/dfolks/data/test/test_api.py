@@ -213,7 +213,11 @@ def test_get_edinet_document_list(mock_get):
     mock_get.return_value.status_code = 200
 
     date = "2025-01-01"
-    df = get_edinet_document_list(date)
+
+    # Patch environment variable for the test
+    with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+        df = get_edinet_document_list(date)
+
     assert isinstance(df, pd.DataFrame)
     assert not df.empty
     assert df.shape[0] == 1
@@ -238,7 +242,10 @@ def test_get_edinet_document(mock_get, fake_zip_bytes):
     mock_get.return_value.iter_content = lambda chunk_size: [fake_zip_bytes]
 
     doc_id = "ABC1234"
-    response = get_edinet_document(doc_id)
+
+    # Patch environment variable for the test
+    with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+        response = get_edinet_document(doc_id)
     assert response.status_code == 200
 
 
@@ -249,7 +256,9 @@ def test_download_edinet_document(mock_get, fake_zip_bytes, temp_dir):
 
     doc_id = "ABC1234"
 
-    download_edinet_document(doc_id, temp_dir)
+    # Patch environment variable for the test
+    with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+        download_edinet_document(doc_id, temp_dir)
 
     zip_path = os.path.join(temp_dir, f"{doc_id}.zip")
     assert os.path.exists(zip_path)
@@ -265,7 +274,8 @@ def test_download_edinet_document_failure(mock_get, temp_dir):
     doc_id = "NONEXISTENT"
 
     with pytest.raises(Exception) as excinfo:
-        download_edinet_document(doc_id, temp_dir)
+        with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+            download_edinet_document(doc_id, temp_dir)
     assert "Error fetching data from EDINET API: 404" in str(excinfo.value)
 
 
@@ -294,7 +304,8 @@ def test_download_edinet_documents(mock_unzip, mock_download, temp_dir):
     """Test downloading multiple EDINET documents."""
     doc_list = pd.DataFrame({"docID": ["DOC1", "DOC2"]})
 
-    download_edinet_documents(doc_list, temp_dir)
+    with patch.dict("os.environ", {"EDINET_API_TOKEN": "fake_token"}):
+        download_edinet_documents(doc_list, temp_dir)
 
     assert mock_download.call_count == 2
     assert mock_unzip.call_count == 2
