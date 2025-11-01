@@ -1,22 +1,30 @@
-name: PR Trigger (Safe)
+name: PR Trigger
 
 on:
   pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
-jobs:
-  trigger-ci:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write  # For triggering other workflows
-      contents: read
+permissions:
+  contents: read
+  actions: write
 
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
     steps:
       - name: Trigger CI workflow on PR branch
-        uses: peter-evans/workflow-dispatch@v1
+        uses: actions/github-script@v7
         with:
-          workflow: ci.yml
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              ref: context.payload.pull_request.head.ref,
+              inputs: {
+                pr_number: context.payload.pull_request.number.toString(),
+                pr_sha: context.payload.pull_request.head.sha,
+              },
+            })
