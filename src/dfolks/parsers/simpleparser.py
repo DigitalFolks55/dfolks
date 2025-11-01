@@ -2,11 +2,11 @@
 
 from typing import ClassVar, Dict, Optional
 
-from dfolks.data.data import AbstractParser
+from dfolks.data.data import NormalClassRegistery
 from dfolks.data.input import load_flat_file
 
 
-class SimpleParser(AbstractParser):
+class SimpleParser(NormalClassRegistery):
     """Simple parser for flat files.
 
     Variables
@@ -22,7 +22,7 @@ class SimpleParser(AbstractParser):
     ----------
     """
 
-    prcls: ClassVar[str] = "SimpleParser"
+    nmclss: ClassVar[str] = "SimpleParser"
 
     source: str
     source_path: str

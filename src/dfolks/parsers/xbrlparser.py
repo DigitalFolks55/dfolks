@@ -5,13 +5,13 @@ from typing import Any, ClassVar, Dict
 
 import pandas as pd
 
-from dfolks.core.classfactory import AbstractParser
+from dfolks.core.classfactory import NormalClassRegistery
 
 # Set up shared logger
 logger = logging.getLogger("shared")
 
 
-class EdinetXbrlParser(AbstractParser):
+class EdinetXbrlParser(NormalClassRegistery):
     """EDINET XBRL parser.
 
     Variables
@@ -21,7 +21,7 @@ class EdinetXbrlParser(AbstractParser):
     ----------
     """
 
-    prcls: ClassVar[str] = "EdinetXbrlParser"
+    nmclss: ClassVar[str] = "EdinetXbrlParser"
     model_xbrl: Any
 
     # def __init__(self, model_xbrl):

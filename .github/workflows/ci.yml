@@ -1,9 +1,7 @@
 name: Continuous Integration
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:  # load from pr_trigger.yml
   push:
     branches: [main]
   release:
@@ -17,11 +15,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # - name: Cache Conda packages
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: ~/conda_pkgs_dir
-    #     key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
+    - name: Cache Conda packages
+      uses: actions/cache@v4
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-conda-
 
     - name: Setup Conda
       uses: conda-incubator/setup-miniconda@v3
@@ -32,11 +32,13 @@ jobs:
         auto-activate-base: false
         use-mamba: true
 
-    # - name: Cache Poetry
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: ~/.cache/pypoetry
-    #     key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+    - name: Cache Poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
 
     - name: Install Poetry
       run: |
@@ -56,4 +58,10 @@ jobs:
       run: poetry run flake8 .
 
     - name: Run pytest
-      run: poetry run pytest --maxfail=1 --disable-warnings -q
+      run: |
+        poetry run pytest \
+          --maxfail=1 \
+          --cov=src \
+          --cov-report=term-missing \
+          --cov-fail-under=70 \
+          -q

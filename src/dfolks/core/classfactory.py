@@ -29,16 +29,16 @@ from dfolks.core.utils import import_all_submodules, set_logger
 
 # Class registry, all sub-classes will be stored at attr_name and not allow duplication.
 __reg_transformer_cls__ = ClassRegistry(attr_name="trsclss", unique=True)
-__reg_workflow_cls__ = ClassRegistry(attr_name="wflcls", unique=True)
-__reg_parser_cls__ = ClassRegistry(attr_name="prcls", unique=True)
+__reg_workflow_cls__ = ClassRegistry(attr_name="wflclss", unique=True)
+__reg_normal_cls__ = ClassRegistry(attr_name="nmclss", unique=True)
 
 
 def allow_overwrite_classes():
     """Allow overwriting in the class registry"""
-    global __reg_transformer_cls__, __reg_workflow_cls__
+    global __reg_transformer_cls__, __reg_workflow_cls__, __reg_normal_cls__
     __reg_transformer_cls__.unique = False
     __reg_workflow_cls__.unique = False
-    __reg_parser_cls__.unique = False
+    __reg_normal_cls__.unique = False
 
 
 class TransformerRegistery(
@@ -87,7 +87,7 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
     """Workflow base class.
 
     Inherited class must have following values
-    1) wflcls: class registration.
+    1) wflclss: class registration.
 
     Key methods
     ----------
@@ -128,7 +128,7 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
         return self.model_dump()
 
 
-class AbstractParser(AutoRegister(__reg_parser_cls__), ABC, BaseModel):
+class NormalClassRegistery(AutoRegister(__reg_normal_cls__), ABC, BaseModel):
     """Abstract parser for data ingestion.
 
     Key methods
@@ -140,17 +140,8 @@ class AbstractParser(AutoRegister(__reg_parser_cls__), ABC, BaseModel):
     ----------
     """
 
-    @abstractmethod
-    def load():
-        "Load method. This should be implemented at subclasses."
-        raise NotImplementedError()
-
-    @abstractmethod
-    def parse():
-        "Parse method. This should be implemented at subclasses."
-        raise NotImplementedError()
-
     @property
+    @abstractmethod
     def variables(self) -> Dict:
         """Return Variables of a pydantic model."""
         return self.model_dump()
@@ -172,13 +163,13 @@ def check_registration():
     for name, cls in registered_classes_workflows.items():
         print(f"{name}: {cls}")
 
-    registered_classes_parsers = __reg_parser_cls__._registry
+    registered_normal_classes = __reg_normal_cls__._registry
     print("Registered Workflow Classes:")
-    for name, cls in registered_classes_parsers.items():
+    for name, cls in registered_normal_classes.items():
         print(f"{name}: {cls}")
 
     return (
         registered_classes_transformer,
         registered_classes_workflows,
-        registered_classes_parsers,
+        registered_normal_classes,
     )

@@ -24,7 +24,7 @@ from dfolks.data.jquants_apis import (
     update_jquants_tokens,
 )
 from dfolks.data.output import (
-    save_to_flatfile,
+    SaveFile,
 )
 from dfolks.parsers.xbrlparser import EdinetXbrlParser
 
@@ -50,7 +50,7 @@ class DataIngestionEdinet(WorkflowsRegistry):
     """
 
     # variables
-    wflcls: ClassVar[str] = "DataIngestionEdinet"
+    wflclss: ClassVar[str] = "DataIngestionEdinet"
 
     corp_codes: List[str] = None
     start_date: str = None
@@ -59,7 +59,6 @@ class DataIngestionEdinet(WorkflowsRegistry):
     format: str = "df"
     target_db: Optional[str] = None
     target_path_fin_report: Optional[str] = None
-    target_path_stock: Optional[str] = None
 
     def date_range(self, start_date, end_date):
         if end_date is None:
@@ -167,7 +166,11 @@ class DataIngestionEdinet(WorkflowsRegistry):
             return dfs
         elif v["format"] == "csv":
             logger.info("Saving DataFrame to CSV format.")
-            save_to_flatfile(
-                df=dfs, db=v["target_db"], path=v["target_path_fin_report"]
-            )
+            SaveFile(
+                df=dfs,
+                file_type=v["format"],
+                file_db=v["target_db"],
+                file_path=v["target_path_fin_report"],
+            ).mode("overwrite").save()
+
             logger.info("Data saved to CSV format.")

@@ -1,6 +1,6 @@
 """Data related classes.
 
-1) AbstractParser for Parse files.
+1) NormalClassRegistery for Parse files.
 2) Validator for validating df; duplication, null etc.
 
 Need to work:

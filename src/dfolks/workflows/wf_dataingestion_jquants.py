@@ -19,7 +19,7 @@ from dfolks.data.jquants_apis import (
     update_jquants_tokens,
 )
 from dfolks.data.output import (
-    save_to_flatfile,
+    SaveFile,
 )
 
 # Set up shared logger
@@ -44,7 +44,7 @@ class DataIngestionJQuants(WorkflowsRegistry):
     """
 
     # variables
-    wflcls: ClassVar[str] = "DataIngestionJQuants"
+    wflclss: ClassVar[str] = "DataIngestionJQuants"
 
     corp_codes: List[str] = None
     format: str = "df"
@@ -102,15 +102,17 @@ class DataIngestionJQuants(WorkflowsRegistry):
         elif v["format"] == "csv":
             logger.info("Saving DataFrame to CSV format.")
             if v["target_path_fin_report"]:
-                save_to_flatfile(
+                SaveFile(
                     df=fin_reports_df,
-                    db=v["target_db"],
-                    path=v["target_path_fin_report"],
-                )
+                    file_db=v["target_db"],
+                    file_path=v["target_path_fin_report"],
+                ).mode("overwrite").save()
             if v["target_path_stock"]:
-                save_to_flatfile(
-                    df=stock_prices_df, db=v["target_db"], path=v["target_path_stock"]
-                )
+                SaveFile(
+                    df=fin_reports_df,
+                    file_db=v["target_db"],
+                    file_path=v["target_path_stock"],
+                ).mode("overwrite").save()
             logger.info("Data saved to CSV format.")
             if not v["target_path_fin_report"] and not v["target_path_stock"]:
                 logger.error("No path defined!")

@@ -3,6 +3,7 @@
 from typing import ClassVar
 
 from dfolks.core.classfactory import (
+    NormalClassRegistery,
     TransformerRegistery,
     WorkflowsRegistry,
     allow_overwrite_classes,
@@ -49,13 +50,29 @@ def test_allow_overwrite_class():
 
 
 class TstWfRegA(WorkflowsRegistry):
-    wflcls: ClassVar[str] = "testcls1"
+    wflclss: ClassVar[str] = "testcls1"
     test_var: int
 
     def run(self):
-        return self.wflcls
+        return self.wflclss
 
 
 def test_workflow_registry():
     test_class = TstWfRegA.model_validate({"test_var": 100})
-    assert test_class.wflcls == "testcls1"
+    assert test_class.wflclss == "testcls1"
+
+
+class TstNormalRegA(NormalClassRegistery):
+    nmclss: ClassVar[str] = "testnmcls1"
+    test_var: int
+
+    @property
+    def variables(self):
+        """Return Variables of a pydantic model."""
+        return self.model_dump()
+
+
+def test_normalcls_registry():
+    test_class = TstNormalRegA.model_validate({"test_var": 100})
+    assert test_class.nmclss == "testnmcls1"
+    assert test_class.variables["test_var"] == 100
