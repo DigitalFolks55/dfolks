@@ -58,6 +58,8 @@ jobs:
       run: poetry run flake8 .
 
     - name: Run pytest
+      env:
+        PYTHONPATH: src
       run: |
         poetry run pytest \
           --maxfail=1 \
