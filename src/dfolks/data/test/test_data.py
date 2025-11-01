@@ -5,33 +5,33 @@ Need to do:
 1) Add tests of output.py for parquet when we enable the function of saving to parquet.
 """
 
-import tempfile
 import unittest
-from pathlib import Path
 from typing import ClassVar
 
 import pandas as pd
 import yaml
 
-from dfolks.core.classfactory import AbstractParser
+from dfolks.core.classfactory import NormalClassRegistery
 from dfolks.data.data import (
     Validator,
 )
 from dfolks.data.input import (
     load_flat_file,
 )
-from dfolks.data.output import (
-    save_to_flatfile,
-)
 
 
-class TstParser(AbstractParser):
+class TstParser(NormalClassRegistery):
     """Test parser class."""
 
-    prcls: ClassVar[str] = "TestParser"
+    nmclss: ClassVar[str] = "TestParser"
 
     path: str = None
     load_all: bool = None
+
+    @property
+    def variables(self):
+        """Return Variables of a pydantic model."""
+        return self.model_dump()
 
     def load(self):
         """Load method."""
@@ -81,8 +81,8 @@ class TestParserCls(unittest.TestCase):
         self.test_validator = Validator.model_validate(self.schema_dict)
 
     def test_is_instance(self):
-        self.assertIsInstance(self.test_parser_csv, AbstractParser)
-        self.assertIsInstance(self.test_parser_xlsx, AbstractParser)
+        self.assertIsInstance(self.test_parser_csv, NormalClassRegistery)
+        self.assertIsInstance(self.test_parser_xlsx, NormalClassRegistery)
         self.assertIsInstance(self.test_validator, Validator)
 
     def test_load_method(self):
@@ -104,41 +104,6 @@ class TestParserCls(unittest.TestCase):
         validated_df_xlsx = self.test_validator.valid(self.test_parser_xlsx.parse())
         pd.testing.assert_frame_equal(validated_df_csv, self.expected_parsed_output)
         pd.testing.assert_frame_equal(validated_df_xlsx, self.expected_parsed_output)
-
-
-class TestSaveToFlatFile(unittest.TestCase):
-    """Test"""
-
-    def setUp(self):
-        self.df = pd.DataFrame({"Column1": ["A", "B", "C"], "Column2": [1, 2, 3]})
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.temp_path = Path(self.temp_dir.name)
-
-    def tearDown(self):
-        self.temp_dir.cleanup()
-
-    def test_save_to_flatfile_with_db(self):
-        db = "test_db"
-        table = "test_table"
-        expected_file = self.temp_path / "FlatHive" / db / f"{table}.csv"
-
-        with unittest.mock.patch("dfolks.data.output.__user_dic__", self.temp_path):
-            save_to_flatfile(df=self.df, db=db, path=table, type="csv")
-
-        self.assertTrue(expected_file.exists())
-
-        # Check if the file was created
-        loaded_df = pd.read_csv(expected_file)
-        self.assertTrue(loaded_df.equals(self.df))
-
-    def test_save_to_flatfile_without_db(self):
-        out_file = self.temp_path / "output.csv"
-        save_to_flatfile(self.df, db=None, path=str(out_file))
-
-        self.assertTrue(out_file.exists())
-
-        loaded_df = pd.read_csv(out_file)
-        self.assertTrue(loaded_df.equals(self.df))
 
 
 def test_load_files_from_dir():

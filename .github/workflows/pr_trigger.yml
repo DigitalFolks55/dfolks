@@ -1,0 +1,22 @@
+name: PR Trigger (Safe)
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  trigger-ci:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # For triggering other workflows
+      contents: read
+
+    steps:
+      - name: Trigger CI workflow on PR branch
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          workflow: ci.yml
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
