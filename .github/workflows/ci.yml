@@ -61,7 +61,7 @@ jobs:
       run: |
         poetry run pytest \
           --maxfail=1 \
-          --cov=src \
+          --cov=dfolks \
           --cov-report=term-missing \
           --cov-fail-under=70 \
           -q
