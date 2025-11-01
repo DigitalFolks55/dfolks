@@ -1,11 +1,14 @@
 name: Continuous Integration
 
 on:
-  workflow_dispatch:  # load from pr_trigger.yml
+  workflow_dispatch:
   push:
     branches: [main]
   release:
     types: [published]
+
+permissions:
+  contents: read
 
 jobs:
   lint-and-test:
