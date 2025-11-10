@@ -7,7 +7,9 @@ Need to do
 import io
 import logging
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -17,10 +19,15 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
-# Path setup (assumes current working directory is project root)
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-CREDENTIALS_PATH = os.path.join(BASE_DIR, "env", "google_client_credentials.json")
-TOKEN_PATH = os.path.join(BASE_DIR, "env", "google_api_token.json")
+# Define the path to the .env file
+env_path = Path(__file__).resolve().parents[3] / "env" / ".env"
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=env_path)
+
+# Path setup (from .env)
+CREDENTIALS_PATH = os.getenv("GOOGLE_API_CREDENTIALS_PATH")
+TOKEN_PATH = os.getenv("GOOGLE_API_TOKEN_PATH")
 
 # Set up a shared logger
 logger = logging.getLogger("shared")
