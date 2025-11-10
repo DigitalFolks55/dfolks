@@ -23,8 +23,4 @@ jobs:
               repo: context.repo.repo,
               workflow_id: 'ci.yml',
               ref: context.payload.pull_request.head.ref,
-              inputs: {
-                pr_number: context.payload.pull_request.number.toString(),
-                pr_sha: context.payload.pull_request.head.sha,
-              },
             })
