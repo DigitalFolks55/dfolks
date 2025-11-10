@@ -25,9 +25,6 @@ env_path = Path(__file__).resolve().parents[3] / "env" / ".env"
 # Load environment variables from .env file
 load_dotenv(dotenv_path=env_path)
 
-# Path setup (from .env)
-CREDENTIALS_PATH = os.getenv("GOOGLE_API_CREDENTIALS_PATH")
-TOKEN_PATH = os.getenv("GOOGLE_API_TOKEN_PATH")
 
 # Set up a shared logger
 logger = logging.getLogger("shared")
@@ -35,6 +32,10 @@ logger = logging.getLogger("shared")
 
 def google_drive_authenticate():
     """Authenticate with Google Drive API and return a service client."""
+    # Path setup (from .env)
+    CREDENTIALS_PATH = os.getenv("GOOGLE_API_CREDENTIALS_PATH")
+    TOKEN_PATH = os.getenv("GOOGLE_API_TOKEN_PATH")
+
     creds = None
 
     # Load saved token if available

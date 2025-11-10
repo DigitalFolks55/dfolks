@@ -17,13 +17,25 @@ class TestGoogleDriveAPI(unittest.TestCase):
         os.environ["GOOGLE_API_CREDENTIALS_PATH"] = "/fake/credentials.json"
         os.environ["GOOGLE_API_TOKEN_PATH"] = "/fake/token.json"
 
+    @patch("builtins.open", new_callable=MagicMock)  # Mock open to prevent file access
+    @patch(
+        "os.path.exists", return_value=True
+    )  # Mock os.path.exists to always return True
     @patch("dfolks.utils.google_api.build")
     @patch("dfolks.utils.google_api.Credentials")
-    def test_google_drive_authenticate(self, mock_credentials, mock_build):
+    @patch("dfolks.utils.google_api.InstalledAppFlow")
+    def test_google_drive_authenticate(
+        self, mock_flow, mock_credentials, mock_build, mock_exists, mock_open
+    ):
         """Test authentication builds and returns a Drive service."""
         # Mock credentials
         mock_creds_instance = MagicMock(valid=True)
         mock_credentials.from_authorized_user_file.return_value = mock_creds_instance
+
+        # Mock InstalledAppFlow to prevent file access
+        mock_flow_instance = MagicMock()
+        mock_flow.from_client_secrets_file.return_value = mock_flow_instance
+        mock_flow_instance.run_local_server.return_value = mock_creds_instance
 
         # Mock the Drive service build
         mock_service = MagicMock()
