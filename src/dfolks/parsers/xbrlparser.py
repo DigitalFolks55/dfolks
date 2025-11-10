@@ -24,9 +24,6 @@ class EdinetXbrlParser(NormalClassRegistery):
     nmclss: ClassVar[str] = "EdinetXbrlParser"
     model_xbrl: Any
 
-    # def __init__(self, model_xbrl):
-    #     self.model_xbrl = model_xbrl
-
     @property
     def variables(self) -> Dict:
         return super().variables
