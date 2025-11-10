@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -10,6 +11,12 @@ from dfolks.utils.google_api import (
 
 
 class TestGoogleDriveAPI(unittest.TestCase):
+
+    def setUp(self):
+        """Set fake environment variables before each test."""
+        os.environ["CREDENTIALS_PATH"] = "/fake/credentials.json"
+        os.environ["TOKEN_PATH"] = "/fake/token.json"
+        os.environ["SCOPES"] = "https://www.googleapis.com/auth/drive.file"
 
     @patch("dfolks.utils.google_api.build")
     @patch("dfolks.utils.google_api.Credentials")
