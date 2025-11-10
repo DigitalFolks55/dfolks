@@ -3,7 +3,7 @@
 import logging
 import sys
 
-from dfolks.core.utils import set_logger
+from dfolks.core.modules import set_logger
 
 
 def test_set_logger():

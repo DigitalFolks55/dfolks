@@ -50,7 +50,7 @@ class DataIngestionEdinet(WorkflowsRegistry):
     """
 
     # variables
-    wflclss: ClassVar[str] = "DataIngestionEdinet"
+    wfclss: ClassVar[str] = "DataIngestionEdinet"
 
     corp_codes: List[str] = None
     start_date: str = None

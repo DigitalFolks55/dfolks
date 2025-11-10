@@ -1,9 +1,13 @@
 """Simple parser for flat files."""
 
+import logging
 from typing import ClassVar, Dict, Optional
 
-from dfolks.data.data import NormalClassRegistery
+from dfolks.core.classfactory import NormalClassRegistery
 from dfolks.data.input import load_flat_file
+
+# Set up shared logger
+logger = logging.getLogger("shared")
 
 
 class SimpleParser(NormalClassRegistery):

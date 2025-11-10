@@ -44,7 +44,7 @@ class DataIngestionJQuants(WorkflowsRegistry):
     """
 
     # variables
-    wflclss: ClassVar[str] = "DataIngestionJQuants"
+    wfclss: ClassVar[str] = "DataIngestionJQuants"
 
     corp_codes: List[str] = None
     format: str = "df"

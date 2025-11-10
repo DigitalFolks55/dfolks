@@ -50,16 +50,16 @@ def test_allow_overwrite_class():
 
 
 class TstWfRegA(WorkflowsRegistry):
-    wflclss: ClassVar[str] = "testcls1"
+    wfclss: ClassVar[str] = "testcls1"
     test_var: int
 
     def run(self):
-        return self.wflclss
+        return self.wfclss
 
 
 def test_workflow_registry():
     test_class = TstWfRegA.model_validate({"test_var": 100})
-    assert test_class.wflclss == "testcls1"
+    assert test_class.wfclss == "testcls1"
 
 
 class TstNormalRegA(NormalClassRegistery):

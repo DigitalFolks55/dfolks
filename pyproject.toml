@@ -28,6 +28,9 @@ requests = "^2.32.4"
 python-xbrl = "^1.1.1"
 beautifulsoup4 = "^4.13.4"
 arelle-release = "^2.37.60"
+google-api-python-client = "^2.186.0"
+google-auth-httplib2 = "^0.2.1"
+google-auth-oauthlib = "^1.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
