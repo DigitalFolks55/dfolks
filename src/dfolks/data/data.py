@@ -12,9 +12,11 @@ Need to work:
 """
 
 import logging
+import re
 from abc import ABC
 from typing import Dict
 
+import pandas as pd
 import pandera as pa
 from pydantic import BaseModel
 
@@ -41,21 +43,30 @@ class Validator(ABC, BaseModel):
     ----------
     """
 
-    schemas: dict
+    schemas: Dict
 
     def valid(self, df):
         """Validate DataFrame."""
         v = self.variables
         logger.debug("Create Pandera DataFrame schema")
         columns = {}
+        rename_cols = {}
         for col, dtype in v["schemas"].items():
+            if re.search(r"Int|Float", dtype["type"]):
+                # Convert to numeric type to avoid validation error
+                logger.debug(f"Convert column {col} to numeric type")
+                df[col] = pd.to_numeric(df[col], errors="coerce")
             column = pa.Column(
-                dtype["type"],
+                # dtype["type"],
+                getattr(pa, dtype["type"]),
                 nullable=dtype.get("nullable", True),
                 unique=dtype.get("unique", False),
+                required=True,
                 coerce=True,
             )
             columns[col] = column
+            if dtype.get("new_column", False):
+                rename_cols[col] = dtype["new_column"]
 
         # Define the DataFrame schema
         df_schema = pa.DataFrameSchema(columns, strict=True)
@@ -67,6 +78,12 @@ class Validator(ABC, BaseModel):
         # Return validated df
         logger.info("Enforce data type and check nullable and duplicated values")
         df_valid = df_schema.validate(df)
+
+        # Rename columns if needed
+        if len(rename_cols) > 0:
+            logger.info("Rename columns")
+            df_valid = df_valid.rename(columns=rename_cols)
+
         return df_valid
 
     @property

@@ -1,11 +1,7 @@
-"""Base Estimator and Transformer.
-
-Both base classes are inherited from variablized class.
+"""Chain process class.
 
 Need to work:
-1) update chainprocess to enable estimator.
-2) revisit save/load; changing to class?.
-3) documentation.
+1) documentation.
 """
 
 from __future__ import annotations
@@ -44,17 +40,19 @@ class ChainProcess:
         """Execute chain process."""
         cls_dict = {}
 
-        for child in self._children:
+        for child in self.children:
             logger.info(f"Processing {child["kind"]} started")
-            cls = load_class(child)  # need this function
-            if isinstance(cls, TransformerRegistery):  # fit_transform
+            cls = load_class(child)
+            if isinstance(cls, TransformerRegistery):
                 fit_cls, df = cls.fit_transform(df)
                 cls_dict.update({f"{child["kind"]}": fit_cls})
             elif isinstance(cls, NormalClassRegistery):
                 df = cls.transform(df)
                 cls_dict.update({f"{child["kind"]}": cls})
             else:
-                raise NotImplementedError("Only TransformerRegistery is supported now.")
+                raise NotImplementedError(
+                    "TransformerRegistery or Normal class which has transform method is supported now."
+                )
             logger.info(f"Processing {child["kind"]} completed")
 
         return cls_dict, df

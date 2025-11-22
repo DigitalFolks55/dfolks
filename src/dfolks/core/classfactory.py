@@ -1,6 +1,7 @@
 """classfactory base classes.
 1) TransformerRegistery: base class for customized transformer.
 2) WorkflowsRegistry: base class for workflow.
+3) NormalClassRegistery: base class for normal classes.
 
 Key libraries:
 pydantic: parsing and validating variables.
@@ -11,7 +12,6 @@ BaseEstimator and TransformerMixin: scikit-learn base classes for transformers.
 Need to work:
 0) more attributes for base classes
 1) documentation
-2) update
 """
 
 from __future__ import annotations
@@ -88,7 +88,7 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
     """Workflow base class.
 
     Inherited class must have following values
-    1) wflclss: class registration.
+    1) wfclss: class registration.
 
     Key methods
     ----------
@@ -132,12 +132,12 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
 class NormalClassRegistery(AutoRegister(__reg_normal_cls__), ABC, BaseModel):
     """Abstract parser for data ingestion.
 
+    Inherited class must have following values
+    1) nmclss: class registration.
+
     Key methods
     ----------
-    load: Abstract method to load data from a file or files in a directory
-        This should be implemented at subclasses.
-    parse: Abstract method to parse an ingested data.
-        This should be implemented at subclasses.
+    variables: Return Variables of a pydantic model.
     ----------
     """
 
@@ -154,16 +154,19 @@ def check_registration():
     import_all_submodules()
 
     # Print out all registered classes.
+    # transformer registry
     registered_classes_transformer = __reg_transformer_cls__._registry
     print("Registered Transformer Classes:")
     for name, cls in registered_classes_transformer.items():
         print(f"{name}: {cls}")
 
+    # workflow registry
     registered_classes_workflows = __reg_workflow_cls__._registry
     print("Registered Workflow Classes:")
     for name, cls in registered_classes_workflows.items():
         print(f"{name}: {cls}")
 
+    # normal class registry
     registered_normal_classes = __reg_normal_cls__._registry
     print("Registered Normal Classes:")
     for name, cls in registered_normal_classes.items():

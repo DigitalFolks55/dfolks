@@ -1,0 +1,12 @@
+kind: DataIngestionJQuantsStockPrice
+
+corp_codes:
+ - "80020"
+ - "83160"
+format: "df"
+# start_date: "2025-11-01"
+# end_date: "2025-11-07"
+# single_date: "2025-11-21"
+target_path_stock: "jp_stock_price"
+write_mode: "upsert"
+schema: "file://src/dfolks/schema/schema_jquants_stock_price.yaml"

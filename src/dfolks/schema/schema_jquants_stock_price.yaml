@@ -1,0 +1,45 @@
+kind: DfValidator
+
+schemas:
+  "Date":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Code":
+    type: String
+    new_column: "LocalCode"
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "AdjustmentOpen":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "AdjustmentHigh":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "AdjustmentLow":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "AdjustmentClose":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "AdjustmentVolume":
+    type: Int
+    nullable: false
+    unique: false
+    primary_key: false
