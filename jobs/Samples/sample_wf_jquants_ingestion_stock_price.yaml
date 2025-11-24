@@ -3,6 +3,8 @@ kind: DataIngestionJQuantsStockPrice
 corp_codes:
  - "80020"
  - "83160"
+corp_filter_col: "ScaleCategory"
+corp_filter: "^TOPIX*"
 format: "df"
 # start_date: "2025-11-01"
 # end_date: "2025-11-07"

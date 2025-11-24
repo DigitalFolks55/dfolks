@@ -51,6 +51,8 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
 
     kind: str = "DataIngestionJQuantsFinReport"
     corp_codes: List[str] = None
+    corp_filter_col: str = None
+    corp_filter: str = None
     start_date: str = None
     end_date: str = None
     single_date: str = None
@@ -69,6 +71,14 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
         ) and value is not None:
             raise ValueError(
                 "If start_date & end_date are defined, single_date should be None."
+            )
+        return value
+
+    @field_validator("corp_filter", mode="before")
+    def _check_corp_filter(cls, value, valid_values):
+        if value is None or valid_values.data["corp_filter_col"] is None:
+            raise ValueError(
+                "Both of corp_filter and corp_filter_col should be defined."
             )
         return value
 
@@ -138,7 +148,17 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
             fin_reports_df = pd.concat(fin_reports, ignore_index=True)
 
         else:
-            corp_lists = get_jquants_corporate_list(idToken=id_token)["Code"].tolist()
+            corp_lists = get_jquants_corporate_list(idToken=id_token)
+            if v["corp_filter"]:
+                corp_lists = corp_lists[
+                    corp_lists[v["corp_filter_col"]]
+                    .astype(str)
+                    .str.contains(v["corp_filter"], regex=True, na=False)
+                ]["Code"].tolist()
+                logger.info(f"Total {len(corp_lists)} corporations after filtering.")
+            else:
+                corp_lists = corp_lists["Code"].tolist()
+
             for code in corp_lists:
                 logger.info(f"Fetching data for code: {code}")
                 if v["single_date"]:
@@ -202,6 +222,8 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
     kind: str = "DataIngestionJQuantsStockPrice"
     corp_codes: List[str] = None
+    corp_filter_col: str = None
+    corp_filter: str = None
     start_date: str = None
     end_date: str = None
     single_date: str = None
@@ -221,6 +243,15 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             raise ValueError(
                 "If start_date & end_date are defined, single_date should be None."
             )
+        return value
+
+    @field_validator("corp_filter", mode="before")
+    def _check_corp_filter(cls, value, valid_values):
+        if value is None or valid_values.data["corp_filter_col"] is None:
+            raise ValueError(
+                "Both of corp_filter and corp_filter_col should be defined."
+            )
+        return value
 
     def fetch_data(self, idToken, code, date=None, start_date=None, end_date=None):
         """Fetch data from JQuants."""
@@ -283,7 +314,17 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         else:
-            corp_lists = get_jquants_corporate_list(idToken=id_token)["Code"].tolist()
+            corp_lists = get_jquants_corporate_list(idToken=id_token)
+            if v["corp_filter"]:
+                corp_lists = corp_lists[
+                    corp_lists[v["corp_filter_col"]]
+                    .astype(str)
+                    .str.contains(v["corp_filter"], regex=True, na=False)
+                ]["Code"].tolist()
+                logger.info(f"Total {len(corp_lists)} corporations after filtering.")
+            else:
+                corp_lists = corp_lists["Code"].tolist()
+
             for code in corp_lists:
                 logger.info(f"Fetching data for code: {code}")
                 if v["single_date"]:
