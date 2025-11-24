@@ -6,6 +6,7 @@ Need to work:
 0) Support for other file types.
 """
 
+import os
 from pathlib import Path
 
 import yaml
@@ -13,15 +14,22 @@ from pydantic import BaseModel, model_validator
 
 # Prefix for external file to be defined as variables.
 FILEPREFIX = "file://"
+PROJECTROOTPATH = Path(__file__).resolve().parents[3]  # project root
 
 
 def _load_by_path(path):
     """Load variables from an external yaml file."""
 
+    global PROJECTROOTPATH
+
     # Get absolute path.
     path = str(path)
-    f_path = Path(path).resolve().absolute()
+    if Path(path).is_absolute():
+        f_path = path
+    else:
+        f_path = Path(os.path.join(PROJECTROOTPATH, path)).resolve()
 
+    print("path =", f_path)
     if not f_path.exists():
         raise FileNotFoundError(f"File not found: {f_path}")
 

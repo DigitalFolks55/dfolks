@@ -60,11 +60,11 @@ class TestParserCls(unittest.TestCase):
         self.schema_yaml = """
         schemas:
             "Column1":
-                type: str
+                type: String
                 nullable: false
                 unique: true
             "Column2":
-                type: str
+                type: String
                 nullable: false
                 unique: true
         """

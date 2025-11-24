@@ -1,0 +1,140 @@
+kind: DfValidator
+
+schemas:
+  "DisclosedDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "LocalCode":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "DisclosureNumber":
+    type: String
+    nullable: false
+    unique: true
+    primary_key: false
+
+  "TypeOfDocument":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "TypeOfCurrentPeriod":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "CurrentPeriodStartDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "CurrentPeriodEndDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "CurrentFiscalYearStartDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "CurrentFiscalYearEndDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "NetSales":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OperatingProfit":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "OrdinaryProfit":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Profit":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "EarningsPerShare":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "DilutedEarningsPerShare":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "TotalAssets":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "Equity":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "EquityToAssetRatio":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BookValuePerShare":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "CashFlowsFromOperatingActivities":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "CashFlowsFromInvestingActivities":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "CashFlowsFromFinancingActivities":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "CashAndEquivalents":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false

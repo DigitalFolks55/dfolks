@@ -108,15 +108,17 @@ def get_jquants_corporate_list(idToken: str) -> list:
 
     Get data at the point of exectuion; date not defined.
     """
-    corp_list = []
 
     headers = {"Authorization": "Bearer {}".format(idToken)}
     r = requests.get("https://api.jquants.com/v1/listed/info", headers=headers)
 
-    for dic in r.json().get("info"):
-        corp_list.append(dic.get("Code"))
+    # for dic in r.json().get("info"):
+    #     corp_list.append(dic.get("Code"))
 
-    return corp_list
+    # return corp_list
+
+    df = pd.DataFrame(r.json().get("info"))
+    return df
 
 
 def get_jquants_fin_report(idToken: str, code: int, date: str = None) -> pd.DataFrame:

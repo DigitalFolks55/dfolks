@@ -65,9 +65,9 @@ def test_get_jquants_corporate_list(mock_get):
     }
     idToken = "dummy_id_token"
     corporate_list = get_jquants_corporate_list(idToken=idToken)
-    assert isinstance(corporate_list, list)
-    assert len(corporate_list) == 2
-    assert corporate_list == ["1234", "5678"]
+    assert isinstance(corporate_list, pd.DataFrame)
+    assert corporate_list.shape == (2, 2)
+    assert corporate_list["Code"].to_list() == ["1234", "5678"]
 
 
 # Test: get_jquants_fin_report

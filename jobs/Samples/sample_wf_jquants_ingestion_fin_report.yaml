@@ -1,0 +1,14 @@
+kind: DataIngestionJQuantsFinReport
+
+# corp_codes:
+#  - "80020"
+#  - "83160"
+corp_filter_col: "ScaleCategory"
+corp_filter: "^TOPIX*"
+format: "df"
+# start_date: "2025-11-01"
+# end_date: "2025-11-07"
+single_date: "2025-06-30"
+target_path_fin_report: "jp_fin_report"
+write_mode: "upsert"
+schema: "file://src/dfolks/schema/schema_jquants_fin_report.yaml"

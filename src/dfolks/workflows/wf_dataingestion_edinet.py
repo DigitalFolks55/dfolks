@@ -88,7 +88,7 @@ class DataIngestionEdinet(WorkflowsRegistry):
             logger.info("Updting JQuants tokens.")
             _, id_token = update_jquants_tokens(save_as_file=True)
             logger.info("JQuants tokens updated successfully.")
-            corp_lists = get_jquants_corporate_list(idToken=id_token)
+            corp_lists = get_jquants_corporate_list(idToken=id_token)["Code"].tolist()
         else:
             corp_lists = v["corp_codes"]
 
