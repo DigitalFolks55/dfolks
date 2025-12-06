@@ -1,9 +1,8 @@
 """API calls to get data from JQUANTS.
 
 Need to do
-0) Enable pydantic to validate variables.
-1) Add more apis.
-2) Add loggers with HTTP status codes.
+0) Add more api calls.
+1) Add loggers with HTTP status codes.
 """
 
 import datetime
@@ -25,13 +24,16 @@ load_dotenv(dotenv_path=env_path)
 
 def get_jquants_api_refresh_token() -> str:
     """Get J-Quants API refesh token."""
+    # Get E-mail address & password from .env file
     data = {
         "mailaddress": os.getenv("JQUANTS_API_EMAIL_ADDRESS"),
         "password": os.getenv("JQUANTS_API_PASSWORD"),
     }
+    # Refresh token request
     r_post = requests.post(
         "https://api.jquants.com/v1/token/auth_user", data=json.dumps(data)
     )
+    # Store refresh token
     refreshToken = r_post.json().get("refreshToken")
 
     if not refreshToken:
@@ -42,6 +44,7 @@ def get_jquants_api_refresh_token() -> str:
 
 def get_jquants_api_token(refreshToken: str = None) -> str:
     """Get J-Quants API token."""
+    # If refreshToken is None, get new one
     if refreshToken is None:
         refreshToken = get_jquants_api_refresh_token()
 
@@ -49,9 +52,11 @@ def get_jquants_api_token(refreshToken: str = None) -> str:
         raise ValueError("Refresh token is required to get J-Quants API token.")
 
     jquants_refresh_token = refreshToken
+    # Get idToken
     r = requests.post(
         f"https://api.jquants.com/v1/token/auth_refresh?refreshtoken={jquants_refresh_token}"
     )
+    # Store idToken
     idToken = r.json().get("idToken")
 
     if not idToken:
@@ -63,10 +68,11 @@ def get_jquants_api_token(refreshToken: str = None) -> str:
 
 
 def update_jquants_tokens(save_as_file=True) -> str:
-    """Get J-Quants API token."""
+    """Update J-Quants API token if it is expired."""
     jquants_token_path = os.getenv("JQUANTS_TOKEN_PATH")
     now = datetime.datetime.now()
 
+    # If a token file (pickle) exists then extract the token from the file
     if os.path.exists(jquants_token_path):
         with open(jquants_token_path, "rb") as f:
             tokens = pickle.load(f)
@@ -75,16 +81,17 @@ def update_jquants_tokens(save_as_file=True) -> str:
             idToken_datetime = tokens.get("idToken").get("datetime")
             idToken = tokens.get("idToken").get("token")
 
+        # If the refresh token is expired (> 7days, but set up 6days), get new refresh tokens
         if (now - refreshToken_datetime).days >= 6:
-            # If the refresh token is still valid, return the existing tokens
             refreshToken = get_jquants_api_refresh_token()
+        # If the id token is expired (> 1day but set up 23hours), get a new one
         if (now - idToken_datetime).total_seconds() >= 60 * 60 * 23:
-            # If the id token is expired, get a new one
             idToken = get_jquants_api_token(refreshToken)
     else:
         refreshToken = get_jquants_api_refresh_token()
         idToken = get_jquants_api_token(refreshToken)
 
+    # Save tokens as a pickle file, if variable save_as_file is True
     if save_as_file:
         tokens = {
             "refreshToken": {
@@ -112,12 +119,8 @@ def get_jquants_corporate_list(idToken: str) -> list:
     headers = {"Authorization": "Bearer {}".format(idToken)}
     r = requests.get("https://api.jquants.com/v1/listed/info", headers=headers)
 
-    # for dic in r.json().get("info"):
-    #     corp_list.append(dic.get("Code"))
-
-    # return corp_list
-
     df = pd.DataFrame(r.json().get("info"))
+
     return df
 
 
@@ -156,16 +159,19 @@ def get_jquants_stock_price(
 
     headers = {"Authorization": "Bearer {}".format(idToken)}
     if date:
+        # With single date
         r = requests.get(
             f"https://api.jquants.com/v1/prices/daily_quotes?code={code}&date={date}",
             headers=headers,
         )
     elif date_from and date_to:
+        # With date range
         r = requests.get(
             f"https://api.jquants.com/v1/prices/daily_quotes?code={code}&from={date_from}&to={date_to}",
             headers=headers,
         )
     else:
+        # Without dates
         r = requests.get(
             f"https://api.jquants.com/v1/prices/daily_quotes?code={code}",
             headers=headers,

@@ -59,12 +59,10 @@ class TransformerRegistery(
     variables: Return variables of the workflow.
     ----------
 
-    Key methods
+    Abstract methods
     ----------
-    fit: Abstract method.
-        Performing fit.
-    transform: Abstract method.
-        Performing transformation.
+    fit: Performing fit.
+    transform: Performing transformation.
     ----------
     """
 
@@ -94,13 +92,13 @@ class WorkflowsRegistry(AutoRegister(__reg_workflow_cls__), ABC, BaseModel):
     ----------
     run: Abstract method.
         Execute overall workflow. To be implemented at subclasses.
-    logger: set up a logger for workflow.
+    logger: Set up a logger for workflow.
     variables: Return variables of the workflow.
     ----------
 
     Variables
     ----------
-    log_level: define level of log.
+    log_level: Define level of log.
         Optional[str] = "INFO"
     log_path: Set a path if you want to store a log in a file.
         Optional[str] = None
@@ -137,7 +135,8 @@ class NormalClassRegistery(AutoRegister(__reg_normal_cls__), ABC, BaseModel):
 
     Key methods
     ----------
-    variables: Return Variables of a pydantic model.
+    variables: Abstract method.
+        Return Variables of a pydantic model.
     ----------
     """
 
@@ -172,6 +171,7 @@ def check_registration():
     for name, cls in registered_normal_classes.items():
         print(f"{name}: {cls}")
 
+    # Return the registries for further use if needed.
     return (
         registered_classes_transformer,
         registered_classes_workflows,
@@ -186,11 +186,13 @@ def load_class(
     # Import all subclasses which are registered in entry points.
     import_all_submodules()
 
+    # Parse YAML input; if it's already a dict, use it directly.
     if isinstance(yml, dict):
         vars = yml
     else:
         vars = yaml.safe_load(yml)
 
+    # kind field is required to identify the class type.
     if "kind" not in vars:
         raise ValueError("The 'kind' field is required to load the class.")
 

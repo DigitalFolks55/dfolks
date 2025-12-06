@@ -1,25 +1,26 @@
 """Mixed in classes.
 
-1) ExternalFileMixin for loading external files.
-
 Need to work:
-0) Support for other file types.
+0) Documentation.
 """
 
 import os
 from pathlib import Path
+from typing import Dict
 
 import yaml
 from pydantic import BaseModel, model_validator
 
 # Prefix for external file to be defined as variables.
 FILEPREFIX = "file://"
-PROJECTROOTPATH = Path(__file__).resolve().parents[3]  # project root
+# Path for project root.
+PROJECTROOTPATH = Path(__file__).resolve().parents[3]
 
 
-def _load_by_path(path):
+def _load_by_path(path) -> Dict:
     """Load variables from an external yaml file."""
 
+    # Import a path of project root.
     global PROJECTROOTPATH
 
     # Get absolute path.
@@ -29,7 +30,7 @@ def _load_by_path(path):
     else:
         f_path = Path(os.path.join(PROJECTROOTPATH, path)).resolve()
 
-    print("path =", f_path)
+    # Raise error if the file does not exist.
     if not f_path.exists():
         raise FileNotFoundError(f"File not found: {f_path}")
 
@@ -41,6 +42,7 @@ def _load_by_path(path):
     with open(f_path) as f:
         ext_params = yaml.safe_load(f)
 
+    # Return imported variables.
     return ext_params
 
 
@@ -52,7 +54,7 @@ class ExternalFileMixin(BaseModel):
     """
 
     @model_validator(mode="before")
-    def _ext_params(cls, values):
+    def _ext_params(cls, values) -> Dict:
         """Load variables from external files."""
         to_be_loaded = {}
         values = values.copy()
