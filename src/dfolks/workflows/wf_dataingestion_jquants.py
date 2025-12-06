@@ -2,8 +2,10 @@
 Workflow for data ingestion from JQuants.
 
 Need to work:
-0) Time duration with start & end date.
-    - if no start & end date, then last 1 month
+0) Documentation.
+1) Add more error handling.
+2) Add file type; parquet.
+3) For other data.
 """
 
 import datetime
@@ -32,7 +34,7 @@ logger = logging.getLogger("shared")
 class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
     """Workflow for data ingestion from JQuants.
 
-    Description
+    Description: Financial Report Data Ingestion from JQuants API.
 
     Key methods
     ----------
@@ -43,6 +45,29 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
     ----------
 
     Variables
+    ----------
+    corp_codes: Corporate codes to ingest data for.
+        List[str] = None
+    corp_filter_col: Column name for corporation filtering.
+        str = None
+    corp_filter: Filter string for corporation filtering (using regex).
+        str = None
+    start_date: Start date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    end_date: End date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    single_date: If single date ingesiton, use this date in 'YYYY-MM-DD' format.
+        str = None
+    format: Output format.
+        str = "df"
+    target_db: Folder or Database path to save the ingested data.
+        Optional[str] = None
+    target_path_fin_report: Full file path to save the financial report data.
+        Optional[str] = None
+    write_mode: File write mode.
+        str = "overwrite"
+    schema: Output data schema.
+        Optional[Dict] = Field(description="data_schema.", default=None)
     ----------
     """
 
@@ -60,7 +85,6 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
     target_db: Optional[str] = None
     target_path_fin_report: Optional[str] = None
     write_mode: str = "overwrite"
-    write_options: Dict = Field(description="write_option", default=None)
     schema: Optional[Dict] = Field(description="data_schema.", default=None)
 
     @field_validator("single_date", mode="before")
@@ -84,17 +108,20 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
 
     def fetch_data(self, idToken, code, date=None):
         """Fetch data from JQuants."""
-        # Implementation for fetching data from JQuants
+        # Implementation for fetching data from JQuants.
         fin_report = get_jquants_fin_report(idToken=idToken, code=code, date=date)
 
         return fin_report
 
     def run(self) -> None:
-        """Run."""
+        """Execute workflow."""
         self.logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
         v = self.variables
+        # Get a logger.
         logger = self.logger
 
+        # If start_date & end_date are defined, generate date range.
         if v["start_date"] and v["end_date"]:
             logger.info(f"Data ingestion from {v['start_date']} to {v['end_date']}.")
             start_date = pd.to_datetime(v["start_date"])
@@ -105,6 +132,7 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
                 .dt.strftime("%Y-%m-%d")
                 .tolist()
             )
+        # If neither start_date nor end_date is defined, set date range to last 1 month.
         elif (
             v["start_date"] is None
             and v["end_date"] is None
@@ -126,10 +154,12 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
         _, id_token = update_jquants_tokens(save_as_file=True)
         logger.info("JQuants tokens updated successfully.")
 
+        # If corp_codes is defined, use them; otherwise get all listed corp codes from JQuants.
         if v["corp_codes"]:
             for code in v["corp_codes"]:
                 logger.info(f"Fetching data for code: {code}")
 
+                # If single_date is defined, use it; otherwise use date_range.
                 if v["single_date"]:
                     logger.info(f"Data ingestion for {v["single_date"]}.")
                     if v["single_date"] == "whole":
@@ -142,13 +172,14 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
                         logger.info(f"Data ingestion for {date}.")
                         fin_report = self.fetch_data(id_token, code, date)
                         fin_reports.append(fin_report)
-                        time.sleep(1)
-                time.sleep(1)  # To avoid hitting rate limits
+                        time.sleep(1)  # To avoid hitting rate limits.
+                time.sleep(1)  # To avoid hitting rate limits.
 
             fin_reports_df = pd.concat(fin_reports, ignore_index=True)
 
         else:
             corp_lists = get_jquants_corporate_list(idToken=id_token)
+            # Apply corporation filter if defined.
             if v["corp_filter"]:
                 corp_lists = corp_lists[
                     corp_lists[v["corp_filter_col"]]
@@ -161,6 +192,7 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
 
             for code in corp_lists:
                 logger.info(f"Fetching data for code: {code}")
+                # If single_date is defined, use it; otherwise use date_range.
                 if v["single_date"]:
                     logger.info(f"Data ingestion for {v["single_date"]}.")
                     if v["single_date"] == "whole":
@@ -173,8 +205,8 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
                         logger.info(f"Data ingestion for {date}.")
                         fin_report = self.fetch_data(id_token, code, date)
                         fin_reports.append(fin_report)
-                        time.sleep(1)
-                time.sleep(1)  # To avoid hitting rate limits
+                        time.sleep(1)  # To avoid hitting rate limits.
+                time.sleep(1)  # To avoid hitting rate limits.
 
             fin_reports_df = pd.concat(fin_reports, ignore_index=True)
 
@@ -182,8 +214,10 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
             logger.warning("No data fetched from JQuants Fin Report API.")
             return
 
+        # Validate dataframe against schema.
         df_valid = Validator.model_validate(v["schema"]).valid(fin_reports_df)
 
+        # Output
         if v["format"] == "df":
             logger.info("Returning DataFrame format.")
             return df_valid
@@ -194,7 +228,9 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_fin_report"],
-                ).mode("overwrite").save()
+                ).mode(
+                    "overwrite"
+                ).save()  # write_mode to be added.
             logger.info("Data saved to CSV format.")
             if not v["target_path_fin_report"]:
                 logger.error("No path defined!")
@@ -203,7 +239,7 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
 class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
     """Workflow for data ingestion from JQuants.
 
-    Description
+    Description: Stock Price Data Ingestion from JQuants API.
 
     Key methods
     ----------
@@ -214,6 +250,29 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
     ----------
 
     Variables
+    ----------
+    corp_codes: Corporate codes to ingest data for.
+        List[str] = None
+    corp_filter_col: Column name for corporation filtering.
+        str = None
+    corp_filter: Filter string for corporation filtering (using regex).
+        str = None
+    start_date: Start date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    end_date: End date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    single_date: If single date ingesiton, use this date in 'YYYY-MM-DD' format.
+        str = None
+    format: Output format.
+        str = "df"
+    target_db: Folder or Database path to save the ingested data.
+        Optional[str] = None
+    target_path_fin_report: Full file path to save the financial report data.
+        Optional[str] = None
+    write_mode: File write mode.
+        str = "overwrite"
+    schema: Output data schema.
+        Optional[Dict] = Field(description="data_schema.", default=None)
     ----------
     """
 
@@ -231,7 +290,6 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
     target_db: Optional[str] = None
     target_path_stock: Optional[str] = None
     write_mode: str = "overwrite"
-    write_options: Dict = Field(description="write_option", default=None)
     schema: Optional[Dict] = Field(description="data_schema.", default=None)
 
     @field_validator("single_date", mode="before")
@@ -255,7 +313,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
     def fetch_data(self, idToken, code, date=None, start_date=None, end_date=None):
         """Fetch data from JQuants."""
-        # Implementation for fetching data from JQuants
+        # Implementation for fetching data from JQuants.
         stock_price = get_jquants_stock_price(
             idToken=idToken,
             code=code,
@@ -267,15 +325,19 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
         return stock_price
 
     def run(self) -> None:
-        """Run."""
+        """Execute workflow."""
         self.logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
         v = self.variables
+        # Get a logger.
         logger = self.logger
 
+        # If start_date & end_date are defined, generate date range.
         if v["start_date"] and v["end_date"]:
             logger.info(f"Data ingestion from {v['start_date']} to {v['end_date']}.")
             start_date = v["start_date"]
             end_date = v["end_date"]
+        # If neither start_date nor end_date is defined, set date range to yesterday.
         elif (
             v["start_date"] is None
             and v["end_date"] is None
@@ -290,9 +352,11 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
         _, id_token = update_jquants_tokens(save_as_file=True)
         logger.info("JQuants tokens updated successfully.")
 
+        # If corp_codes is defined, use them; otherwise get all listed corp codes from JQuants.
         if v["corp_codes"]:
             for code in v["corp_codes"]:
                 logger.info(f"Fetching data for code: {code}")
+                # If single_date is defined, use it; otherwise use date_range.
                 if v["single_date"]:
                     logger.info(f"Fetching data for {v["single_date"]}.")
                     if v["single_date"] == "whole":
@@ -308,13 +372,14 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                         id_token, code, start_date=start_date, end_date=end_date
                     )
                     stock_prices.append(stock_price)
-                    time.sleep(1)
-                time.sleep(1)  # To avoid hitting rate limits
+                    time.sleep(1)  # To avoid hitting rate limits.
+                time.sleep(1)  # To avoid hitting rate limits.
 
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         else:
             corp_lists = get_jquants_corporate_list(idToken=id_token)
+            # Apply corporation filter if defined.
             if v["corp_filter"]:
                 corp_lists = corp_lists[
                     corp_lists[v["corp_filter_col"]]
@@ -327,6 +392,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
             for code in corp_lists:
                 logger.info(f"Fetching data for code: {code}")
+                # If single_date is defined, use it; otherwise use date_range.
                 if v["single_date"]:
                     logger.info(f"Fetching data for {v["single_date"]}.")
                     if v["single_date"] == "whole":
@@ -342,13 +408,15 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                         id_token, code, start_date=start_date, end_date=end_date
                     )
                     stock_prices.append(stock_price)
-                    time.sleep(1)
-                time.sleep(1)  # To avoid hitting rate limits
+                    time.sleep(1)  # To avoid hitting rate limits.
+                time.sleep(1)  # To avoid hitting rate limits.
 
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
+        # Validate dataframe against schema.
         df_valid = Validator.model_validate(v["schema"]).valid(stock_prices_df)
 
+        # Output
         if v["format"] == "df":
             logger.info("Returning DataFrame format.")
             return df_valid
@@ -359,7 +427,10 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                     df=df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_fin_report"],
-                ).mode("overwrite").save()
+                ).mode(
+                    "overwrite"
+                ).save()  # write_mode to be added.
             logger.info("Data saved to CSV format.")
+
             if not v["target_path_fin_report"]:
                 logger.error("No path defined!")

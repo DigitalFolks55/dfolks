@@ -1,4 +1,9 @@
-"""XBRL parsers"""
+"""XBRL parsers.
+
+Need to do
+0) XBRL input: not valiable but def?
+1) More add functionality and values
+"""
 
 import logging
 from typing import Any, ClassVar, Dict
@@ -16,8 +21,8 @@ class EdinetXbrlParser(NormalClassRegistery):
 
     Variables
     ----------
-    source_path: str
-        Source path.
+    model_xbrl: XBRL model.
+        Any
     ----------
     """
 

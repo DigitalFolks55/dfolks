@@ -1,14 +1,11 @@
 """Data related classes.
 
-1) NormalClassRegistery for Parse files.
-2) Validator for validating df; duplication, null etc.
+1) Validator class for DataFrame validation.
 
 Need to work:
-0) Pydantic validation of variables at Validator (Schemas).
-0-1) Error handling.
-1) Enable set up pks, partitions at Valdator.
-2) GX (Later due to compability issue).
-3) Compatible with hadoop/spark using hdfs (Future work with pyspark).
+0) More error handling.
+1) GX (Later due to compability issue).
+2) Compatible with hadoop/spark using hdfs (Future work with pyspark).
 """
 
 import logging
@@ -37,27 +34,33 @@ class Validator(ABC, BaseModel):
     ----------
     schemas: dict
         DataFrame schemas.
-        1) type: data type
-        2) nullable: default True  # Allow null or not
-        3) unique: default False  # Allow duplication or not
+        1) type: Data type
+        2) nullable: Allow null or not  # Default True
+        3) unique: Allow duplication or not  # Default False
+        4) new_column: Rename column if needed. # Default False
+        5) primary_key: Define primary key. # Default False
     ----------
     """
 
     schemas: Dict
 
-    def valid(self, df):
+    def valid(self, df) -> pd.DataFrame:
         """Validate DataFrame."""
         v = self.variables
         logger.debug("Create Pandera DataFrame schema")
+
         columns = {}
         rename_cols = {}
+
         for col, dtype in v["schemas"].items():
+            # Need to add: check type in schema if no return error
             if re.search(r"Int|Float", dtype["type"]):
-                # Convert to numeric type to avoid validation error
                 logger.debug(f"Convert column {col} to numeric type")
+                # Convert to numeric type to avoid validation error
                 df[col] = pd.to_numeric(df[col], errors="coerce")
+
+            # Define column schema
             column = pa.Column(
-                # dtype["type"],
                 getattr(pa, dtype["type"]),
                 nullable=dtype.get("nullable", True),
                 unique=dtype.get("unique", False),
@@ -65,13 +68,15 @@ class Validator(ABC, BaseModel):
                 coerce=True,
             )
             columns[col] = column
+
+            # Update a dictionary for renaming columns
             if dtype.get("new_column", False):
                 rename_cols[col] = dtype["new_column"]
 
         # Define the DataFrame schema
         df_schema = pa.DataFrameSchema(columns, strict=True)
 
-        # Drop not defined columns
+        # Drop columns which are not defined in the schema
         logger.info("Retain defined columns in the schema")
         df = df[df_schema.columns.keys()]
 

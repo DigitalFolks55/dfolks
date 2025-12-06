@@ -2,7 +2,7 @@
 
 Need to do
 0) Simplify the function.
-1) Integrate with parsers.
+1) Integrate to dataprep.py.
 """
 
 import glob as gl

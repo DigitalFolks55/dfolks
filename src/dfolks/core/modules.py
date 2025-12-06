@@ -12,7 +12,7 @@ import logging
 import pkgutil
 import sys
 
-# Global loggers
+# Global logger
 loggers = {}
 
 

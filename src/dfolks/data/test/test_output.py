@@ -132,3 +132,16 @@ def test_primary_key_missing_in_new_data(temp_dir):
 
     with pytest.raises(ValueError):
         saver.save()
+
+
+def test_upsert_with_duplicates_in_new_data(temp_dir):
+    existing_path = os.path.join(temp_dir, "existing.csv")
+    existing = pd.DataFrame({"id": [1], "value": ["A"]})
+    existing.to_csv(existing_path, index=False)
+
+    new = pd.DataFrame({"id": [2, 2], "value": ["B", "C"]})
+    saver = SaveFile(df=new, file_path=existing_path, primary_keys=["id"])
+    saver.mode("upsert")
+
+    with pytest.raises(ValueError):
+        saver.save()

@@ -6,3 +6,9 @@ DATA_HIVE_DIR = "*****/****"
 JQUANTS_API_EMAIL_ADDRESS = "****@***.com"
 JQUANTS_API_PASSWORD = "*****"
 JQUANTS_TOKEN_PATH = "***/***/jquants_tokens.pickle"
+
+EDINET_API_TOKEN = "******"
+EDINET_API_ENDPOINT = "https://api.edinet-fsa.go.jp/api/v2"
+
+GOOGLE_API_CREDENTIALS_PATH = "*****/env/*****.json"
+GOOGLE_API_TOKEN_PATH = "*****/env/*****.json"
