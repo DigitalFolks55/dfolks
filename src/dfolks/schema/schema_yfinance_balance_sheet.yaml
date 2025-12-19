@@ -1,0 +1,290 @@
+kind: DfValidator
+
+schemas:
+  "date":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "ticker":
+    type: String
+    new_column: "local_code"
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Treasury Shares Number":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Ordinary Shares Number":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Share Issued":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Tangible Book Value":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Invested Capital":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Working Capital":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Tangible Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Common Stock Equity":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Capitalization":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Equity Gross Minority Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Minority Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Stockholders Equity":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Equity Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Treasury Stock":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Retained Earnings":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Additional Paid In Capital":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Capital Stock":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Common Stock":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Liabilities Net Minority Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Non Current Liabilities Net Minority Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Non Current Liabilities":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Non Current Pension And Other Postretirement Benefit Plans":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Tradeand Other Payables Non Current":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Non Current Deferred Taxes Liabilities":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Long Term Debt And Capital Lease Obligation":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Long Term Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Current Liabilities":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Current Liabilities":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Current Debt And Capital Lease Obligation":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Current Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Payables":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Tax Payable":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Accounts Payable":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Non Current Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Non Current Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Non Current Deferred Taxes Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Investments":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Investmentin Financial Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Available For Sale Securities":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Long Term Equity Investment":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Goodwill And Other Intangible Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Intangible Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net PPE":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Current Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Current Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Assets Held For Sale Current":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Inventory":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Accounts Receivable":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Gross Accounts Receivable":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Cash Cash Equivalents And Short Term Investments":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Short Term Investments":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Cash And Cash Equivalents":
+    type: Float
+    nullable: true
+    unique: false

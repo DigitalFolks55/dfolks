@@ -9,10 +9,12 @@ import os
 import pickle
 import tempfile
 import zipfile
+from functools import wraps
 from unittest.mock import patch
 
 import pandas as pd
 import pytest
+import yfinance as yf
 
 from dfolks.data.edinet_apis import (
     download_edinet_document,
@@ -29,9 +31,20 @@ from dfolks.data.jquants_apis import (
     get_jquants_stock_price,
     update_jquants_tokens,
 )
+from dfolks.data.yfinance_apis import (
+    get_yfinance_balance_sheet,
+    get_yfinance_cash_flow,
+    get_yfinance_dividends,
+    get_yfinance_income_statement,
+    get_yfinance_info,
+    get_yfinance_stock_prices,
+    get_yfinance_ticker,
+)
 
-
+"""J-Quants API tests."""
 # Test: get_jquants_api_refresh_token
+
+
 @patch("dfolks.data.jquants_apis.requests.post")
 @patch("dfolks.data.jquants_apis.os.getenv")
 def test_get_jquants_api_refresh_token(mock_getenv, mock_post):
@@ -194,6 +207,10 @@ def test_update_without_existing_file_jquants(
     assert tokens["idToken"]["token"] == "new_id_token"
 
 
+"""EDINET API tests."""
+# Test: get_edinet_document_list
+
+
 @patch("dfolks.data.edinet_apis.requests.get")
 def test_get_edinet_document_list(mock_get):
     mock_get.return_value.json.return_value = {
@@ -236,6 +253,7 @@ def fake_zip_bytes():
     return memory_zip.getvalue()
 
 
+# Test: get_edinet_document
 @patch("dfolks.data.edinet_apis.requests.get")
 def test_get_edinet_document(mock_get, fake_zip_bytes):
     mock_get.return_value.status_code = 200
@@ -249,6 +267,7 @@ def test_get_edinet_document(mock_get, fake_zip_bytes):
     assert response.status_code == 200
 
 
+# Test: download_edinet_document
 @patch("dfolks.data.edinet_apis.requests.get")
 def test_download_edinet_document(mock_get, fake_zip_bytes, temp_dir):
     mock_get.return_value.status_code = 200
@@ -267,6 +286,7 @@ def test_download_edinet_document(mock_get, fake_zip_bytes, temp_dir):
     assert content == fake_zip_bytes
 
 
+# Test: download_edinet_document failure
 @patch("dfolks.data.edinet_apis.requests.get")
 def test_download_edinet_document_failure(mock_get, temp_dir):
     mock_get.return_value.status_code = 404
@@ -279,6 +299,7 @@ def test_download_edinet_document_failure(mock_get, temp_dir):
     assert "Error fetching data from EDINET API: 404" in str(excinfo.value)
 
 
+# Test: unzip_file
 def test_unzip_file_extracts_and_removes_zip(temp_dir):
     """Test that unzip_file extracts and optionally removes the zip."""
     doc_id = "S100ABC"
@@ -298,6 +319,7 @@ def test_unzip_file_extracts_and_removes_zip(temp_dir):
         assert f.read() == "sample data"
 
 
+# Test: download_edinet_documents
 @patch("dfolks.data.edinet_apis.download_edinet_document")
 @patch("dfolks.data.edinet_apis.unzip_file")
 def test_download_edinet_documents(mock_unzip, mock_download, temp_dir):
@@ -309,3 +331,157 @@ def test_download_edinet_documents(mock_unzip, mock_download, temp_dir):
 
     assert mock_download.call_count == 2
     assert mock_unzip.call_count == 2
+
+
+"""yahoo finance API tests."""
+# Mock up yf.ticker
+
+
+class MockTicker:
+    def __init__(self, ticker):
+        self.ticker = ticker
+
+        self.info = {
+            "symbol": ticker,
+            "shortName": "Test Company",
+            "sector": "Technology",
+        }
+
+        self.income_stmt = pd.DataFrame(
+            {
+                "2023-12-31": {"Total Revenue": 1000, "Net Income": 100},
+                "2022-12-31": {"Total Revenue": 900, "Net Income": 90},
+            }
+        )
+
+        self.balance_sheet = pd.DataFrame(
+            {
+                "2023-12-31": {"Total Assets": 5000, "Total Liab": 2000},
+                "2022-12-31": {"Total Assets": 4500, "Total Liab": 1800},
+            }
+        )
+
+        self.cashflow = pd.DataFrame(
+            {
+                "2023-12-31": {"Operating Cash Flow": 300, "Investing Cash Flow": -100},
+                "2022-12-31": {"Operating Cash Flow": 250, "Investing Cash Flow": -80},
+            }
+        )
+
+        self.dividends = pd.DataFrame(
+            {"Dividends": {"2023-06-01": 1.5, "2022-06-01": 1.4, "2021-06-01": 1.3}}
+        )
+        self.dividends.index.name = "Date"
+
+
+# Decorator to mock yf.Ticker
+def mock_yfinance_ticker(func):
+    """Decorator to mock yf.Ticker"""
+
+    @wraps(func)
+    def wrapper(monkeypatch, *args, **kwargs):
+        monkeypatch.setattr(yf, "Ticker", lambda t: MockTicker(t))
+        return func(monkeypatch, *args, **kwargs)
+
+    return wrapper
+
+
+# Tests related to yf.Ticker
+@mock_yfinance_ticker
+def test_get_yfinance_ticker(monkeypatch):
+    ticker = "TEST"
+    yf_ticker = get_yfinance_ticker(ticker)
+    assert isinstance(yf_ticker, MockTicker)
+    assert yf_ticker.ticker == ticker
+
+
+@mock_yfinance_ticker
+def test_get_yfinance_info(monkeypatch):
+    ticker = "TEST"
+    df = get_yfinance_info(ticker)
+    assert isinstance(df, pd.DataFrame)
+    assert df["symbol"].iloc[0] == ticker
+    assert df["shortName"].iloc[0] == "Test Company"
+    assert df["sector"].iloc[0] == "Technology"
+
+
+@mock_yfinance_ticker
+def test_get_yfinance_income_statement(monkeypatch):
+    ticker = "TEST"
+    df = get_yfinance_income_statement(ticker)
+    cols = ["date", "Total Revenue", "Net Income", "ticker"]
+    assert isinstance(df, pd.DataFrame)
+    assert df.shape[0] == 2  # Two periods
+    assert set(cols).issubset(df.columns)
+    assert df["ticker"].iloc[0] == ticker
+
+
+@mock_yfinance_ticker
+def test_get_yfinance_balance_sheet(monkeypatch):
+    ticker = "TEST"
+    df = get_yfinance_balance_sheet(ticker)
+    cols = ["date", "Total Assets", "Total Liab", "ticker"]
+    assert isinstance(df, pd.DataFrame)
+    assert df.shape[0] == 2  # Two periods
+    assert set(cols).issubset(df.columns)
+    assert df["ticker"].iloc[0] == ticker
+
+
+@mock_yfinance_ticker
+def test_get_yfinance_cash_flow(monkeypatch):
+    ticker = "TEST"
+    df = get_yfinance_cash_flow(ticker)
+    cols = ["date", "Operating Cash Flow", "Investing Cash Flow", "ticker"]
+    assert isinstance(df, pd.DataFrame)
+    assert df.shape[0] == 2  # Two periods
+    assert set(cols).issubset(df.columns)
+    assert df["ticker"].iloc[0] == ticker
+
+
+@mock_yfinance_ticker
+def test_get_yfinance_dividends(monkeypatch):
+    ticker = "TEST"
+    df = get_yfinance_dividends(ticker)
+    cols = ["date", "Dividends", "ticker"]
+    assert isinstance(df, pd.DataFrame)
+    assert df.shape[0] == 3  # Three dividend entries
+    assert set(cols).issubset(df.columns)
+    assert df["ticker"].iloc[0] == ticker
+
+
+# Mock up yf.download
+def mock_yfinance_download(func):
+    @wraps(func)
+    def wrapper(monkeypatch, *args, **kwargs):
+        def fake_download(*args, **kwargs):
+            cols = pd.MultiIndex.from_product(
+                [["Test"], ["Open", "High", "Low"]],
+                names=["Ticker", "Price"],
+            )
+            df = pd.DataFrame(
+                [[1, 2, 3]],
+                index=[pd.Timestamp("2025-01-01")],
+                columns=cols,
+            )
+            df.index.name = "Date"
+            return df
+
+        monkeypatch.setattr(yf, "download", fake_download)
+        return func(monkeypatch, *args, **kwargs)
+
+    return wrapper
+
+
+@mock_yfinance_download
+def test_get_yfinance_stock_prices(monkeypatch):
+    ticker = "Test"
+    start_date = "2025-01-01"
+    end_date = "2025-01-31"
+
+    df = get_yfinance_stock_prices(ticker, start_date=start_date, end_date=end_date)
+    expected_cols = ["date", "Open", "High", "Low", "ticker"]
+
+    assert isinstance(df, pd.DataFrame)
+    assert set(expected_cols).issubset(df.columns)
+    assert df.shape[0] == 1  # One date entry
+    assert df["ticker"].iloc[0] == ticker

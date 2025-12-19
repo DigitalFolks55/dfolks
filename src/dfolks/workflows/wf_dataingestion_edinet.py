@@ -203,8 +203,9 @@ class DataIngestionEdinet(WorkflowsRegistry):
                 file_type=v["format"],
                 file_db=v["target_db"],
                 file_path=v["target_path_fin_report"],
-            ).mode(
-                "overwrite"
-            ).save()  # Need to change write mode
+            ).mode(v["write_mode"]).save()
 
             logger.info("Data saved to CSV format.")
+
+        else:
+            raise NotImplementedError("other type not implemented yet!")

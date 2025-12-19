@@ -228,12 +228,13 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_fin_report"],
-                ).mode(
-                    "overwrite"
-                ).save()  # write_mode to be added.
+                ).mode(v["write_mode"]).save()
             logger.info("Data saved to CSV format.")
             if not v["target_path_fin_report"]:
                 logger.error("No path defined!")
+
+        else:
+            raise NotImplementedError("other type not implemented yet!")
 
 
 class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
@@ -427,10 +428,11 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                     df=df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_fin_report"],
-                ).mode(
-                    "overwrite"
-                ).save()  # write_mode to be added.
+                ).mode(v["write_mode"]).save()
             logger.info("Data saved to CSV format.")
 
             if not v["target_path_fin_report"]:
                 logger.error("No path defined!")
+
+        else:
+            raise NotImplementedError("other type not implemented yet!")
