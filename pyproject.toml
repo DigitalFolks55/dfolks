@@ -31,6 +31,7 @@ arelle-release = "^2.37.60"
 google-api-python-client = "^2.186.0"
 google-auth-httplib2 = "^0.2.1"
 google-auth-oauthlib = "^1.2.3"
+yfinance = "^0.2.66"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,0 +1,20 @@
+kind: DfValidator
+
+schemas:
+  "date":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "ticker":
+    type: String
+    new_column: "local_code"
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Dividends":
+    type: Float
+    nullable: false
+    unique: false

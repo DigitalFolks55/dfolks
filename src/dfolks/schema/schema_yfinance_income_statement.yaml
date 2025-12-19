@@ -1,0 +1,240 @@
+kind: DfValidator
+
+schemas:
+  "date":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "ticker":
+    type: String
+    new_column: "local_code"
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Tax Effect Of Unusual Items":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Tax Rate For Calcs":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Normalized EBITDA":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Unusual Items":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Unusual Items Excluding Goodwill":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income From Continuing Operation Net Minority Interest":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Reconciled Depreciation":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Reconciled Cost Of Revenue":
+    type: Float
+    nullable: true
+    unique: false
+
+  "EBITDA":
+    type: Float
+    nullable: true
+    unique: false
+
+  "EBIT":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Interest Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Expense":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Normalized Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income From Continuing And Discontinued Operation":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Expenses":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Diluted Average Shares":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Basic Average Shares":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Diluted EPS":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Basic EPS":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Diluted NI Availto Com Stockholders":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income Common Stockholders":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Otherunder Preferred Stock Dividend":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Minority Interests":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income Including Noncontrolling Interests":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income Continuous Operations":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Tax Provision":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Pretax Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Non Operating Income Expenses":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Special Income Charges":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Special Charges":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Impairment Of Capital Assets":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Non Operating Interest Income Expense":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Expense Non Operating":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Income Non Operating":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Operating Income":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Operating Expense":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Operating Expenses":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Selling General And Administration":
+    type: Float
+    nullable: true
+    unique: false
+
+  "General And Administrative Expense":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Gross Profit":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Cost Of Revenue":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Total Revenue":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Operating Revenue":
+    type: Float
+    nullable: true
+    unique: false

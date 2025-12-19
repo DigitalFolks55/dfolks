@@ -1,0 +1,18 @@
+kind: DataIngestionYFinanceFinReport
+
+corp_codes:
+ - "80020"
+ - "83160"
+# corp_filter_col: "ScaleCategory"
+# corp_filter: "^TOPIX*"
+format: "df"
+cut_date: "2024-01-01"
+# target_path_income_statement: "jp_income_statement"
+# target_path_balance_sheet: "jp_balance_sheet"
+# target_path_cash_flow: "jp_cash_flow"
+# target_path_dividends: "jp_dividends"
+# write_mode: "upsert"
+schema_income_statement: "file://src/dfolks/schema/schema_yfinance_income_statement.yaml"
+schema_balance_sheet: "file://src/dfolks/schema/schema_yfinance_balance_sheet.yaml"
+schema_cash_flow: "file://src/dfolks/schema/schema_yfinance_cash_flow.yaml"
+schema_dividends: "file://src/dfolks/schema/schema_yfinance_dividends.yaml"

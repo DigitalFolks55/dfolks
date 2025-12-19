@@ -58,6 +58,9 @@ class Validator(ABC, BaseModel):
                 logger.debug(f"Convert column {col} to numeric type")
                 # Convert to numeric type to avoid validation error
                 df[col] = pd.to_numeric(df[col], errors="coerce")
+            elif re.search(r"Date", dtype["type"]):
+                logger.debug(f"Convert column {col} to date type")
+                df[col] = pd.to_datetime(df["date"], errors="coerce").dt.date
 
             # Define column schema
             column = pa.Column(

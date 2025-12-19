@@ -1,0 +1,250 @@
+kind: DfValidator
+
+schemas:
+  "date":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "ticker":
+    type: String
+    new_column: "local_code"
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Free Cash Flow":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Repurchase Of Capital Stock":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Repayment Of Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Issuance Of Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Capital Expenditure":
+    type: Float
+    nullable: true
+    unique: false
+
+  "End Cash Position":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Cash Adjustment Outside Changein Cash":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Beginning Cash Position":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Effect Of Exchange Rate Changes":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Changes In Cash":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Financing Cash Flow":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Other Financing Charges":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Common Stock Dividend Paid":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Common Stock Issuance":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Common Stock Payments":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Issuance Payments Of Debt":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Short Term Debt Issuance":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Long Term Debt Issuance":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Long Term Debt Payments":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Long Term Debt Issuance":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Investing Cash Flow":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Investment Purchase And Sale":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Sale Of Investment":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Investment Properties Purchase And Sale":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Sale Of Investment Properties":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Purchase Of Investment Properties":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Business Purchase And Sale":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Sale Of Business":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Purchase Of Business":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net PPE Purchase And Sale":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Sale Of PPE":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Purchase Of PPE":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Operating Cash Flow":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Taxes Refund Paid":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Received Cfo":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Interest Paid Cfo":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Dividend Received Cfo":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Change In Working Capital":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Change In Payable":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Change In Inventory":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Change In Receivables":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Other Non Cash Items":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Deferred Tax":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Depreciation And Amortization":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Depreciation":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Gain Loss On Sale Of PPE":
+    type: Float
+    nullable: true
+    unique: false
+
+  "Net Income From Continuing Operations":
+    type: Float
+    nullable: true
+    unique: false
