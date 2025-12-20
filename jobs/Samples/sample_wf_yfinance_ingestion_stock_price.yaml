@@ -1,15 +1,15 @@
 kind: DataIngestionYFinanceStockPrice
 
-corp_codes:
+corp_codes:  # If it is not defined, then using corp list from JQuants
  - "80020"
  - "83160"
-# corp_filter_col: "ScaleCategory"
-# corp_filter: "^TOPIX*"
-format: "df"
-# period: "1mo"
-# inverval: "1d"
-start_date: "2024-12-01"
-end_date: "2025-12-10"
-# target_path_fin_report: "jp_fin_report"
-# write_mode: "upsert"
-schema_stock_price: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"
+corp_filter_col: "ScaleCategory"  # If corp_codes is defined, no need
+corp_filter: "^TOPIX*"  # If corp_codes is defined, no need
+period: "1mo"  # Not able to set up this if start_date or end_date is defined
+inverval: "1d"  # Not able to set up this if start_date or end_date is defined
+start_date: "2024-12-01"  # Not able to set up this if period or interval is defined
+end_date: "2025-12-10"  # Not able to set up this if period or interval is defined
+format: "df"  # df, csv, parquet
+target_path_stock_price: "jp_fin_report"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_stock_price: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"  # Output dataframe schema

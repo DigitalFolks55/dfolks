@@ -14,7 +14,7 @@ Need to do
 import logging
 import os
 from pathlib import Path
-from typing import ClassVar, Dict, List
+from typing import ClassVar, Dict, List, Optional
 
 import pandas as pd
 from pydantic import ConfigDict
@@ -72,7 +72,7 @@ class SaveFile(NormalClassRegistery):
     nmclss: ClassVar[str] = "SaveFile"
     df: pd.DataFrame
     file_type: str = "csv"
-    file_db: str = None
+    file_db: Optional[str] = None
     file_path: str = None
     primary_keys: List[str] = None
     partition_cols: List[str] = None

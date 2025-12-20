@@ -1,18 +1,19 @@
 kind: DataIngestionYFinanceFinReport
 
-corp_codes:
+corp_codes:  # If it is not defined, then using corp list from JQuants
  - "80020"
  - "83160"
-# corp_filter_col: "ScaleCategory"
-# corp_filter: "^TOPIX*"
-format: "df"
-cut_date: "2024-01-01"
-# target_path_income_statement: "jp_income_statement"
-# target_path_balance_sheet: "jp_balance_sheet"
-# target_path_cash_flow: "jp_cash_flow"
-# target_path_dividends: "jp_dividends"
-# write_mode: "upsert"
-schema_income_statement: "file://src/dfolks/schema/schema_yfinance_income_statement.yaml"
-schema_balance_sheet: "file://src/dfolks/schema/schema_yfinance_balance_sheet.yaml"
-schema_cash_flow: "file://src/dfolks/schema/schema_yfinance_cash_flow.yaml"
-schema_dividends: "file://src/dfolks/schema/schema_yfinance_dividends.yaml"
+corp_filter_col: "ScaleCategory"  # If corp_codes is defined, no need
+corp_filter: "^TOPIX*"  # If corp_codes is defined, no need
+cut_date: "2024-01-01"  # Date to be filtered out
+format: "df"  # df, csv, parquet
+target_db: "Sample"  # If you want to store data into a specific root folder
+target_path_income_statement: "jp_income_statement"  # File or table name
+target_path_balance_sheet: "jp_balance_sheet"  # File or table name
+target_path_cash_flow: "jp_cash_flow"   # File or table name
+target_path_dividends: "jp_dividends"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_income_statement: "file://src/dfolks/schema/schema_yfinance_income_statement.yaml"  # Output dataframe schema
+schema_balance_sheet: "file://src/dfolks/schema/schema_yfinance_balance_sheet.yaml"  # Output dataframe schema
+schema_cash_flow: "file://src/dfolks/schema/schema_yfinance_cash_flow.yaml"  # Output dataframe schema
+schema_dividends: "file://src/dfolks/schema/schema_yfinance_dividends.yaml"  # Output dataframe schema
