@@ -291,9 +291,6 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
 
             logger.info("Data saved to CSV format.")
 
-            if not v["target_path_fin_report"]:
-                logger.error("No path defined!")
-
         else:
             raise NotImplementedError("other type not implemented yet!")
 
@@ -503,9 +500,6 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for income statement!")
-
-            if not v["target_path_fin_report"]:
-                logger.error("No path defined!")
 
         else:
             raise NotImplementedError("other type not implemented yet!")

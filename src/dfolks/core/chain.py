@@ -50,8 +50,9 @@ class ChainProcess:
             cls = load_class(child)
             # If cls is TransformerRegistery, conduct fit_transform
             if isinstance(cls, TransformerRegistery):
-                fit_cls, df = cls.fit_transform(df)
-                cls_dict.update({f"{child["kind"]}": fit_cls})
+                cls.fit(df)
+                df = cls.transform(df)
+                cls_dict.update({f"{child["kind"]}": cls})
             # If cls is NormalClassRegistery, conduct transform
             elif isinstance(cls, NormalClassRegistery):
                 df = cls.transform(df)
