@@ -31,6 +31,7 @@ from dfolks.data.yfinance_apis import (
     get_yfinance_income_statement,
     get_yfinance_stock_prices,
 )
+from dfolks.utils.utils import extract_primary_keys
 
 # Set up shared logger
 logger = logging.getLogger("shared")
@@ -73,6 +74,8 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
         Optional[str] = None
     write_mode: File write mode.
         str = "overwrite"
+    missing_col_impute: If True, impute missing columns based on schema; Due to data missing due to API.
+        bool = True
     schema_income_statement: Output data schema of income statement.
         Optional[Dict] = Field(description="data_schema_income_statement.", default=None)
     schema_balance_sheet: Output data schema of income statement.
@@ -99,6 +102,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
     target_path_cash_flow: Optional[str] = None
     target_path_dividends: Optional[str] = None
     write_mode: str = "overwrite"
+    missing_col_impute: bool = True
     schema_income_statement: Optional[Dict] = Field(
         description="data_schema_income_statement.", default=None
     )
@@ -144,7 +148,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
         logger = self.logger
 
         if v["cut_date"] is None:
-            cut_date = datetime.datetime.today() - datetime.timedelta(days=365)
+            cut_date = datetime.datetime.today() - datetime.timedelta(days=30)
             cut_date = cut_date.strftime("%Y-%m-%d")
         else:
             cut_date = v["cut_date"]
@@ -227,6 +231,21 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
             logger.warning("No data fetched from Yahoo finance API.")
             return
 
+        if v["missing_col_impute"]:
+            # Add missing columns based on schema.
+            for col in v["schema_income_statement"]["schemas"].keys():
+                if col not in income_statements_df.columns:
+                    income_statements_df[col] = None
+            for col in v["schema_balance_sheet"]["schemas"].keys():
+                if col not in balance_sheets_df.columns:
+                    balance_sheets_df[col] = None
+            for col in v["schema_cash_flow"]["schemas"].keys():
+                if col not in cash_flows_df.columns:
+                    cash_flows_df[col] = None
+            for col in v["schema_dividends"]["schemas"].keys():
+                if col not in dividends_reports_df.columns:
+                    dividends_reports_df[col] = None
+
         # Validate dataframe against schema.
         income_statements_df_vaid = Validator.model_validate(
             v["schema_income_statement"]
@@ -240,7 +259,6 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
         dividends_reports_df_valid = Validator.model_validate(
             v["schema_dividends"]
         ).valid(dividends_reports_df)
-        # dividends_reports_df_valid = dividends_reports_df
 
         # Output
         if v["format"] == "df":
@@ -258,6 +276,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=income_statements_df_vaid,
                     file_db=v["target_db"],
                     file_path=v["target_path_income_statement"],
+                    primary_keys=extract_primary_keys(v["schema_income_statement"]),
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for income statement!")
@@ -267,6 +286,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=balance_sheets_df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_balance_sheet"],
+                    primary_keys=extract_primary_keys(v["schema_balance_sheet"]),
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for balance sheet!")
@@ -276,6 +296,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=cash_flows_df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_cash_flow"],
+                    primary_keys=extract_primary_keys(v["schema_cash_flow"]),
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for cash flow!")
@@ -285,6 +306,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                     df=dividends_reports_df_valid,
                     file_db=v["target_db"],
                     file_path=v["target_path_dividends"],
+                    primary_keys=extract_primary_keys(v["schema_dividends"]),
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for dividends!")
@@ -497,9 +519,10 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
                     df=stock_prices_df_vaid,
                     file_db=v["target_db"],
                     file_path=v["target_path_stock"],
+                    primary_keys=extract_primary_keys(v["schema_stock_price"]),
                 ).mode(v["write_mode"]).save()
             else:
-                logger.error("No path defined for income statement!")
+                logger.error("No path defined for stock price!")
 
         else:
             raise NotImplementedError("other type not implemented yet!")

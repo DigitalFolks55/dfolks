@@ -1,0 +1,11 @@
+# This is a workflow for stock price ingestion from Yahoo Finance
+kind: DataIngestionYFinanceStockPrice
+
+corp_codes: "file://jobs/jp_corp_code_list.yaml"
+# corp_filter_col: "ScaleCategory"  # If corp_codes is defined, no need
+# corp_filter: "^TOPIX*"  # If corp_codes is defined, no need
+format: "csv"  # df, csv, parquet
+target_db: "yf_data"  # If you want to store data into a specific root folder
+target_path_stock: "jp_stock_price.csv"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_stock_price: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"  # Output dataframe schema
