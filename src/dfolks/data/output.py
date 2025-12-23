@@ -11,6 +11,7 @@ Need to do
 5) Documentations
 """
 
+import datetime
 import logging
 import os
 from pathlib import Path
@@ -122,6 +123,56 @@ class SaveFile(NormalClassRegistery):
 
         return self
 
+    def _infer_dtype_from_ingested_df(self, df: pd.DataFrame) -> Dict:
+        """infer data types from ingested dataframe."""
+        schema = {}
+
+        for col in df.columns:
+            df_col = df[col].dropna()
+
+            if df_col.empty:
+                schema[col] = "object"
+                continue
+
+            value = df_col.iloc[0]
+
+            # Infer data types: Better way?
+            if isinstance(value, datetime.date) and not isinstance(
+                value, datetime.datetime
+            ):
+                schema[col] = "Date"
+            elif isinstance(value, datetime.datetime):
+                schema[col] = "Datetime"
+            elif isinstance(value, str):
+                schema[col] = "String"
+            elif isinstance(value, int):
+                schema[col] = "Int"
+            elif isinstance(value, float):
+                schema[col] = "Float"
+            else:
+                schema[col] = "Object"
+
+        return schema
+
+    def _enforce_dtype(self, df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
+        """Enforce data types based on inferred schema."""
+        # Cast datatypes based on schema; Better way?
+        for col in df.columns:
+            if schema[col] == "Date":
+                df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+            elif schema[col] == "Datetime":
+                df[col] = pd.to_datetime(df[col], errors="coerce")
+            elif schema[col] == "String":
+                df[col] = df[col].astype("string")
+            elif schema[col] == "int":
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("int64")
+            elif schema[col] == "float":
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("float64")
+            else:
+                df[col] = df[col].astype("object")
+
+        return df
+
     @property
     def path(self) -> "SaveFile":
         # Load variables.
@@ -183,7 +234,10 @@ class SaveFile(NormalClassRegistery):
         )
 
         # append", "incremental", "upsert"
-        if v["write_mode"] in ["append", "incremental", "upsert"]:
+        if (
+            v["write_mode"] in ["append", "incremental", "upsert"]
+            and not existing_df.empty
+        ):
             # Check whether primary key columns are in existing df.
             if v["primary_keys"] and not all(
                 pk in existing_df.columns for pk in v["primary_keys"]
@@ -211,48 +265,68 @@ class SaveFile(NormalClassRegistery):
                         f"Primary keys {v["primary_keys"]} not found in new data."
                     )
 
+        # Cast datatypes based on df
+        if not existing_df.empty:
+            df_dtypes = self._infer_dtype_from_ingested_df(df)
+            existing_df = self._enforce_dtype(existing_df, df_dtypes)
+
         # overwrite
         if self.write_mode == "overwrite" or not os.path.exists(file_path):
             result_df = df
 
         # append
         elif self.write_mode == "append":
-            result_df = pd.concat([existing_df, df], ignore_index=True)
+            # If no existing data, then execute "overwrite".
+            if existing_df.empty:
+                result_df = df
+            else:
+                result_df = pd.concat([existing_df, df], ignore_index=True)
 
         # incremental
         elif self.write_mode == "incremental":
-            # Take row keys with primary key columns.
-            existing_keys = existing_df[v["primary_keys"]].drop_duplicates()
-            # Flag rows which is not in existing df ("left_only")
-            new_df = df.merge(
-                existing_keys, on=v["primary_keys"], how="left", indicator=True
-            )
-            # existing_df and new rows ("left_only" form new_df)
-            result_df = pd.concat(
-                [
-                    existing_df,
-                    new_df[new_df["_merge"] == "left_only"].drop(columns="_merge"),
-                ],
-                ignore_index=True,
-            )
+            # If no existing data, then execute "overwrite".
+            if existing_df.empty:
+                result_df = df
+            else:
+                # Take row keys with primary key columns.
+                existing_keys = existing_df[v["primary_keys"]].drop_duplicates()
+                # Flag rows which is not in existing df ("left_only")
+                new_df = df.merge(
+                    existing_keys, on=v["primary_keys"], how="left", indicator=True
+                )
+                # existing_df and new rows ("left_only" form new_df)
+                result_df = pd.concat(
+                    [
+                        existing_df,
+                        new_df[new_df["_merge"] == "left_only"].drop(columns="_merge"),
+                    ],
+                    ignore_index=True,
+                )
 
         # upsert
         elif self.write_mode == "upsert":
-            # Check duplication in new df based on primary keys
-            if df.duplicated(subset=v["primary_keys"]).any():
-                raise ValueError(
-                    "Duplication found in new data based on primary keys. Upsert aborted."
+            # If no existing data, then execute "overwrite".
+            if existing_df.empty:
+                result_df = df
+            else:
+                # Check duplication in new df based on primary keys
+                if df.duplicated(subset=v["primary_keys"]).any():
+                    raise ValueError(
+                        "Duplication found in new data based on primary keys. Upsert aborted."
+                    )
+                # Remove rows in existing_df that will be replaced
+                merged = existing_df.merge(
+                    df[v["primary_keys"]],
+                    on=v["primary_keys"],
+                    how="left",
+                    indicator=True,
                 )
-            # Remove rows in existing_df that will be replaced
-            merged = existing_df.merge(
-                df[v["primary_keys"]], on=v["primary_keys"], how="left", indicator=True
-            )
-            # Flag rows which is not in df ("left_only")
-            existing_filtered = merged[merged["_merge"] == "left_only"].drop(
-                columns="_merge"
-            )
-            # existing_df not in new df and new rows ("left_only" form new_df)
-            result_df = pd.concat([existing_filtered, df], ignore_index=True)
+                # Flag rows which is not in df ("left_only")
+                existing_filtered = merged[merged["_merge"] == "left_only"].drop(
+                    columns="_merge"
+                )
+                # existing_df not in new df and new rows ("left_only" form new_df)
+                result_df = pd.concat([existing_filtered, df], ignore_index=True)
 
         # Save final result
         self.write_func(result_df, file_path)

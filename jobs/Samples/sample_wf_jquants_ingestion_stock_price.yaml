@@ -9,7 +9,7 @@ start_date: "2025-11-01"  # Not able to set up this if single_date is defined
 end_date: "2025-11-07"  # Not able to set up this if single_date is defined
 single_date: "2025-06-30"   # Not able to set up this if start_date or end_date is defined
 format: "df"  # df, csv, parquet
-target_db: "Sample"  # If you want to store data into a specific root folder
-target_path_fin_report: "jp_fin_report"  # File or table name
+target_db: "jquants"  # If you want to store data into a specific root folder
+target_path_fin_report: "jp_stock_price.csv"  # File or table name
 write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
-schema: "file://src/dfolks/schema/schema_jquants_fin_report.yaml"  # Output dataframe schema
+schema: "file://src/dfolks/schema/schema_jquants_stock_price.yaml"  # Output dataframe schema
