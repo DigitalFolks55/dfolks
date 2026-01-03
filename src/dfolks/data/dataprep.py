@@ -20,6 +20,7 @@ import pandas as pd
 from pydantic import Field
 
 from dfolks.core.classfactory import NormalClassRegistery
+from dfolks.core.mixin import ExternalFileMixin
 from dfolks.data.data import Validator, enforce_dtype, fillna_dataframe_numeric_cols
 from dfolks.data.output import __user_dic__
 from dfolks.data.variables.dataprep_var import DfVariables, FillnaVariables
@@ -28,7 +29,7 @@ from dfolks.data.variables.dataprep_var import DfVariables, FillnaVariables
 logger = logging.getLogger("shared")
 
 
-class DataExtractor(NormalClassRegistery):
+class DataExtractor(NormalClassRegistery, ExternalFileMixin):
     """Data extractor class."""
 
     nmclss: ClassVar[str] = "DataExtractor"
@@ -36,6 +37,9 @@ class DataExtractor(NormalClassRegistery):
     kind: str = "DataExtractor"
 
     base_df: DfVariables
+    # schema_base_df: Optional[Dict] = Field(
+    #     description="schema_for_base_df.", default=None
+    # )
     join_dfs: List = None
     fillna_data: List = None
     impute_data: Dict = None
@@ -50,13 +54,12 @@ class DataExtractor(NormalClassRegistery):
         """Return Variables of a pydantic model."""
         return self.model_dump()
 
-    @property
     def get_full_path(self, db: Optional[str], path: str) -> str:
         """Get full path."""
-        if db:
+        if db is not None:
             full_path = Path.joinpath(__user_dic__, db, path)
         else:
-            full_path = path
+            full_path = Path(path)
 
         return full_path
 
@@ -68,22 +71,23 @@ class DataExtractor(NormalClassRegistery):
 
         if v.get("base_df")["target_db"]:
             # Set up folder path to be stored.
+            print(v["base_df"]["target_db"], v["base_df"]["target_path"])
             full_path = self.get_full_path(
-                v["base_df"]["target_db"], v["base_df"]["target_path"]
+                db=v["base_df"]["target_db"], path=v["base_df"]["target_path"]
             )
         else:
-            full_path = v["base_df"]["target_path"]
+            full_path = self.get_full_path(db=None, path=v["base_df"]["target_path"])
 
         logger.info(f"Extract data from {full_path}")
-        if full_path.endswith(".csv"):
+        if full_path.suffix == ".csv":
             base_df = pd.read_csv(full_path)
-        elif full_path.endswith(".parquet"):
+        elif full_path.suffix == ".parquet":
             base_df = pd.read_parquet(full_path)
         else:
             raise NotImplementedError("Not implemented yet!")
 
         logger.info("Enforce datatype for base dataframe.")
-        if v.get("base_df")["schemas"]:
+        if v.get("schemas_base_df"):
             schemas = {}
             for col in v["base_df"]["schemas"]:
                 schemas[col] = v["base_df"]["schemas"][col]["type"]
@@ -105,12 +109,14 @@ class DataExtractor(NormalClassRegistery):
                     join_df_dict["target_db"], join_df_dict["target_path"]
                 )
             else:
-                full_path = join_df_dict["target_path"]
+                full_path = self.get_full_path(
+                    db=None, path=join_df_dict["target_path"]
+                )
             logger.info(f"Extract and join a dataframe: {join_df['target_path']}")
 
-            if full_path.endswith(".csv"):
+            if full_path.suffix == ".csv":
                 df = pd.read_csv(full_path)
-            elif full_path.endswith(".parquet"):
+            elif full_path.suffix == ".parquet":
                 df = pd.read_parquet(full_path)
             else:
                 raise NotImplementedError("Not implemented yet!")

@@ -2,8 +2,10 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from dfolks.core.mixin import ExternalFileMixin
 
-class DfVariables(BaseModel):
+
+class DfVariables(ExternalFileMixin):
     """Class for variables of dataframe for data extactor."""
 
     target_db: Optional[str] = None
