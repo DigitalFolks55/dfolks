@@ -21,6 +21,7 @@ import pandas as pd
 from pydantic import ConfigDict
 
 from dfolks.core.classfactory import NormalClassRegistery
+from dfolks.data.data import enforce_dtype
 
 # Set up shared logger
 logger = logging.getLogger("shared")
@@ -154,25 +155,6 @@ class SaveFile(NormalClassRegistery):
 
         return schema
 
-    def _enforce_dtype(self, df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
-        """Enforce data types based on inferred schema."""
-        # Cast datatypes based on schema; Better way?
-        for col in df.columns:
-            if schema[col] == "Date":
-                df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
-            elif schema[col] == "Datetime":
-                df[col] = pd.to_datetime(df[col], errors="coerce")
-            elif schema[col] == "String":
-                df[col] = df[col].astype("string")
-            elif schema[col] == "int":
-                df[col] = pd.to_numeric(df[col], errors="coerce").astype("int64")
-            elif schema[col] == "float":
-                df[col] = pd.to_numeric(df[col], errors="coerce").astype("float64")
-            else:
-                df[col] = df[col].astype("object")
-
-        return df
-
     @property
     def path(self) -> "SaveFile":
         # Load variables.
@@ -268,7 +250,7 @@ class SaveFile(NormalClassRegistery):
         # Cast datatypes based on df
         if not existing_df.empty:
             df_dtypes = self._infer_dtype_from_ingested_df(df)
-            existing_df = self._enforce_dtype(existing_df, df_dtypes)
+            existing_df = enforce_dtype(existing_df, df_dtypes)
 
         # overwrite
         if self.write_mode == "overwrite" or not os.path.exists(file_path):
