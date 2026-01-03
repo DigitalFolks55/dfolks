@@ -98,3 +98,47 @@ class Validator(ABC, BaseModel):
     def variables(self) -> Dict:
         """Return Variables of a pydantic model."""
         return self.model_dump()
+
+
+def enforce_dtype(df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
+    """Enforce data types based on inferred schema."""
+    # Cast datatypes based on schema; Better way?
+    for col in df.columns:
+        if schema[col] == "Date":
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+        elif schema[col] == "Datetime":
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+        elif schema[col] == "String":
+            df[col] = df[col].astype("string")
+        elif schema[col] == "Int":
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+        elif schema[col] == "Float":
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Float64")
+        else:
+            df[col] = df[col].astype("object")
+
+    return df
+
+
+def fillna_dataframe_numeric_cols(df: pd.DataFrame, fillna_dict: Dict) -> pd.DataFrame:
+    """Fillna for numeric columns of dataframe based on fillna_dict."""
+
+    fillna_method = {
+        "mean": pd.Series.mean,
+        "median": pd.Series.median,
+        "mode": pd.Series.mode,
+        "min": pd.Series.min,
+        "max": pd.Series.max,
+        "sum": pd.Series.sum,
+        "zero": lambda x: 0,
+    }
+
+    df = df.fillna(
+        {
+            col: fillna_method[method](df[col])
+            for col, method in fillna_dict.items()
+            if col in df.columns
+        }
+    )
+
+    return df
