@@ -11,6 +11,7 @@ Need to do
 3) Data validation.
 """
 
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional
@@ -22,6 +23,9 @@ from dfolks.core.classfactory import NormalClassRegistery
 from dfolks.data.data import Validator, enforce_dtype, fillna_dataframe_numeric_cols
 from dfolks.data.output import __user_dic__
 from dfolks.data.variables.dataprep_var import DfVariables, FillnaVariables
+
+# Set up shared logger
+logger = logging.getLogger("shared")
 
 
 class DataExtractor(NormalClassRegistery):
@@ -59,6 +63,7 @@ class DataExtractor(NormalClassRegistery):
     @property
     def get_base_df(self) -> pd.DataFrame:
         """Get base dataframe."""
+        logger.info("Load base dataframe.")
         v = self.variables
 
         if v.get("base_df")["target_db"]:
@@ -69,6 +74,7 @@ class DataExtractor(NormalClassRegistery):
         else:
             full_path = v["base_df"]["target_path"]
 
+        logger.info(f"Extract data from {full_path}")
         if full_path.endswith(".csv"):
             base_df = pd.read_csv(full_path)
         elif full_path.endswith(".parquet"):
@@ -76,16 +82,20 @@ class DataExtractor(NormalClassRegistery):
         else:
             raise NotImplementedError("Not implemented yet!")
 
+        logger.info("Enforce datatype for base dataframe.")
         if v.get("base_df")["schemas"]:
             schemas = {}
             for col in v["base_df"]["schemas"]:
                 schemas[col] = v["base_df"]["schemas"][col]["type"]
             base_df = enforce_dtype(base_df, schemas)
 
+        logger.info("Successfully loaded base dataframe.")
         return base_df
 
     def merge_join_dfs(self, base_df, list_of_dfs) -> pd.DataFrame:
         """Join dataframes."""
+        len_base_df = len(base_df)
+
         for join_df in list_of_dfs:
             join_df_dict = DfVariables.model_validate(join_df).model_dump()
 
@@ -96,6 +106,7 @@ class DataExtractor(NormalClassRegistery):
                 )
             else:
                 full_path = join_df_dict["target_path"]
+            logger.info(f"Extract and join a dataframe: {join_df['target_path']}")
 
             if full_path.endswith(".csv"):
                 df = pd.read_csv(full_path)
@@ -104,14 +115,25 @@ class DataExtractor(NormalClassRegistery):
             else:
                 raise NotImplementedError("Not implemented yet!")
 
+            logger.info("Enforce datatype for joining dataframe.")
             if join_df_dict.get("schemas", None):
                 df = enforce_dtype(df, join_df_dict["schemas"])
 
             join_type = join_df_dict.get("join_type", "inner")
             join_keys = join_df_dict.get("join_keys", None)
 
+            logger.info(f"Join type: {join_type}, Join keys: {join_keys}")
+
             if join_keys is not None:
                 base_df = base_df.merge(df, how=join_type, on=join_keys)
+                logger.info("Successfully joined the dataframe.")
+            else:
+                logger.warning(
+                    "Join keys are not provided. Skip joining this dataframe."
+                )
+
+        if len(base_df) != len_base_df:
+            raise ValueError("Duplication occred after joining dataframes.")
 
         return base_df
 
@@ -125,6 +147,10 @@ class DataExtractor(NormalClassRegistery):
         for fillna_var in v["fillna_data"]:
             fillna_var_dict = FillnaVariables.model_validate(fillna_var).model_dump()
 
+            logger.info(
+                f"Fillna column: {fillna_var_dict['column']}, value: {fillna_var_dict['value']}"
+            )
+
             if (
                 fillna_var_dict["column"]
                 in df.select_dtypes(include=["number"]).columns
@@ -136,8 +162,10 @@ class DataExtractor(NormalClassRegistery):
                 fillna_dict_others[fillna_var_dict["column"]] = fillna_var_dict["value"]
 
         if len(fillna_dict_numeric) > 0:
+            logger.debug(f"Fillna numeric columns: {fillna_dict_numeric}")
             df = fillna_dataframe_numeric_cols(df, fillna_dict_numeric)
         if len(fillna_dict_others) > 0:
+            logger.debug(f"Fillna other columns: {fillna_dict_others}")
             df = df.fillna(fillna_dict_others)
 
         return df
@@ -152,24 +180,31 @@ class DataExtractor(NormalClassRegistery):
 
     def extract(self) -> pd.DataFrame:
         """Extract data as dataframe."""
+        logger.info("Start data extraction process.")
         v = self.variables
+        logger.info("Get base dataframe.")
         df = self.get_base_df
 
+        logger.info("Join other dataframes.")
         if v["join_dfs"]:
             df = self.merge_join_dfs(df, v["join_dfs"])
 
+        logger.info("Replace null values.")
         if v["fillna_data"]:
             df = self.fillna_df(df)
 
+        logger.info("Filtering base dataframe.")
         if v["filter_query"]:
             df = self.filter_df(df)
 
+        logger.info("Validate final dataframe.")
         if v["schema_final_df"]:
             df_valid = Validator.model_validate(v["schema_final_df"]).valid(df)
         else:
             df_valid = df
 
         if v["save_final_df"]:
+            logger.info("Save final dataframe to cache folder.")
             cache_folder = Path.joinpath(__user_dic__, "cache")
             if not cache_folder.exists():
                 cache_folder.mkdir(parents=True, exist_ok=True)
@@ -179,4 +214,5 @@ class DataExtractor(NormalClassRegistery):
 
             df_valid.to_csv(full_path, index=False)
 
+        logger.info("Data extraction process is completed.")
         return df_valid
