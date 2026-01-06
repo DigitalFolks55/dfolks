@@ -423,15 +423,15 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             return df_valid
         elif v["format"] == "csv":
             logger.info("Saving DataFrame to CSV format.")
-            if v["target_path_fin_report"]:
+            if v["target_path_stock"]:
                 SaveFile(
                     df=df_valid,
                     file_db=v["target_db"],
-                    file_path=v["target_path_fin_report"],
+                    file_path=v["target_path_stock"],
                 ).mode(v["write_mode"]).save()
             logger.info("Data saved to CSV format.")
 
-            if not v["target_path_fin_report"]:
+            if not v["target_path_stock"]:
                 logger.error("No path defined!")
 
         else:
