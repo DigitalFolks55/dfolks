@@ -60,7 +60,7 @@ class Validator(ABC, BaseModel):
                 df[col] = pd.to_numeric(df[col], errors="coerce")
             elif re.search(r"Date", dtype["type"]):
                 logger.debug(f"Convert column {col} to date type")
-                df[col] = pd.to_datetime(df["date"], errors="coerce").dt.date
+                df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
 
             # Define column schema
             column = pa.Column(
