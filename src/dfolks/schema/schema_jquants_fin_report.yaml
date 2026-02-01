@@ -1,141 +1,141 @@
 kind: DfValidator
 
 schemas:
-  "DisclosedDate":
+  "DiscDate":
     type: Date
     new_column: "date"
     nullable: false
     unique: false
     primary_key: false
 
-  "LocalCode":
+  "Code":
     type: String
     new_column: "local_code"
     nullable: false
     unique: false
     primary_key: true
 
-  "DisclosureNumber":
+  "DiscNo":
     type: String
     nullable: false
     unique: true
     primary_key: false
 
-  "TypeOfDocument":
+  "DocType":
     type: String
     nullable: false
     unique: false
     primary_key: true
 
-  "TypeOfCurrentPeriod":
+  "CurPerType":
     type: String
     nullable: false
     unique: false
     primary_key: true
 
-  "CurrentPeriodStartDate":
+  "CurPerSt":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "CurrentPeriodEndDate":
+  "CurPerEn":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "CurrentFiscalYearStartDate":
+  "CurFYSt":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "CurrentFiscalYearEndDate":
+  "CurFYEn":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "NetSales":
+  "Sales":  # 売上高
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "OperatingProfit":
+  "OP":  # 営業利益
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "OrdinaryProfit":
+  "OdP":  # 経常利益
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "Profit":
+  "NP":  # 当期純利益
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "EarningsPerShare":
+  "EPS":  # 一株当たり当期純利益
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "DilutedEarningsPerShare":
+  "DEPS":  # 潜在株式調整後一株あたり当期純利益
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "TotalAssets":
+  "TA":  # 総資産
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "Equity":
+  "Eq":  # 純資産
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "EquityToAssetRatio":
+  "EqAR":  # 自己資本比率
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "BookValuePerShare":
+  "BPS":  # 一株当たり純資産
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "CashFlowsFromOperatingActivities":
+  "CFO":  # 営業活動によるキャッシュフロー
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "CashFlowsFromInvestingActivities":
+  "CFI":  # 投資活動によるキャッシュフロー
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "CashFlowsFromFinancingActivities":
+  "CFF":  # 財務活動によるキャッシュフロー
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "CashAndEquivalents":
+  "CashEq":  # 現金及び現金同等物
     type: Float
     nullable: true
     unique: false

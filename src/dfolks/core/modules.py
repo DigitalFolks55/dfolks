@@ -55,7 +55,6 @@ def set_logger(name, level, log_path):
 def import_all_submodules(packages=("dfolks",)):
     """Dynamically imports all submodules of a package."""
     for package_name in packages:
-        print(package_name)
         package = importlib.import_module(package_name)
         for _, module_name, _ in pkgutil.walk_packages(
             package.__path__, package.__name__ + "."

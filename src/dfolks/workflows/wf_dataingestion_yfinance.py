@@ -20,8 +20,8 @@ from dfolks.core.classfactory import WorkflowsRegistry
 from dfolks.core.mixin import ExternalFileMixin
 from dfolks.data.data import Validator
 from dfolks.data.jquants_apis import (
-    get_jquants_corporate_list,
-    update_jquants_tokens,
+    get_jquants_api_key_v2,
+    get_jquants_corporate_list_v2,
 )
 from dfolks.data.output import SaveFile
 from dfolks.data.yfinance_apis import (
@@ -178,12 +178,12 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
             dividends_reports_df = pd.concat(dividends_reports, ignore_index=True)
 
         else:
-            logger.info("Updting JQuants tokens.")
-            _, id_token = update_jquants_tokens(save_as_file=True)
-            logger.info("JQuants tokens updated successfully.")
+            logger.info("Get JQuants api key.")
+            api_key = get_jquants_api_key_v2()
+            logger.info("JQuants api key updated successfully.")
 
             # Get corporation list from JQuants.
-            corp_lists = get_jquants_corporate_list(idToken=id_token)
+            corp_lists = get_jquants_corporate_list_v2(api_key=api_key)
             # Apply corporation filter if defined.
             if v["corp_filter"]:
                 corp_lists = corp_lists[
@@ -465,12 +465,12 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         else:
-            logger.info("Updting JQuants tokens.")
-            _, id_token = update_jquants_tokens(save_as_file=True)
-            logger.info("JQuants tokens updated successfully.")
+            logger.info("Get JQuants api key.")
+            api_key = get_jquants_api_key_v2()
+            logger.info("JQuants api key updated successfully.")
 
             # Get corporation list from JQuants.
-            corp_lists = get_jquants_corporate_list(idToken=id_token)
+            corp_lists = get_jquants_corporate_list_v2(api_key=api_key)
             # Apply corporation filter if defined.
             if v["corp_filter"]:
                 corp_lists = corp_lists[

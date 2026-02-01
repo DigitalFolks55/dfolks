@@ -23,8 +23,8 @@ from dateutil.relativedelta import relativedelta
 from dfolks.core.classfactory import WorkflowsRegistry
 from dfolks.data.edinet_apis import download_edinet_documents, get_edinet_document_list
 from dfolks.data.jquants_apis import (
-    get_jquants_corporate_list,
-    update_jquants_tokens,
+    get_jquants_api_key_v2,
+    get_jquants_corporate_list_v2,
 )
 from dfolks.data.output import (
     SaveFile,
@@ -107,10 +107,10 @@ class DataIngestionEdinet(WorkflowsRegistry):
 
         # If corp_codes is not defined, get all listed corp codes from JQuants.
         if v["corp_codes"] is None:
-            logger.info("Updting JQuants tokens.")
-            _, id_token = update_jquants_tokens(save_as_file=True)
-            logger.info("JQuants tokens updated successfully.")
-            corp_lists = get_jquants_corporate_list(idToken=id_token)["Code"].tolist()
+            logger.info("Get JQuants api key.")
+            api_key = get_jquants_api_key_v2()
+            logger.info("JQuants api key retrieved successfully.")
+            corp_lists = get_jquants_corporate_list_v2(api_key=api_key)["Code"].tolist()
         else:
             corp_lists = v["corp_codes"]
 
