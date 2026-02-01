@@ -18,34 +18,34 @@ schemas:
   "AdjO":
     type: Float
     new_column: "open_price"
-    nullable: false
+    nullable: true  # Can be null https://jpx-jquants.com/ja/spec/eq-bars-daily
     unique: false
     primary_key: false
 
   "AdjH":
     type: Float
     new_column: "high_price"
-    nullable: false
+    nullable: true  # Can be null https://jpx-jquants.com/ja/spec/eq-bars-daily
     unique: false
     primary_key: false
 
   "AdjL":
     type: Float
     new_column: "low_price"
-    nullable: false
+    nullable: true  # Can be null https://jpx-jquants.com/ja/spec/eq-bars-daily
     unique: false
     primary_key: false
 
   "AdjC":
     type: Float
     new_column: "close_price"
-    nullable: false
+    nullable: true  # Can be null https://jpx-jquants.com/ja/spec/eq-bars-daily
     unique: false
     primary_key: false
 
   "AdjVo":
     type: Int
     new_column: "transact_volume"
-    nullable: false
+    nullable: true  # Can be null https://jpx-jquants.com/ja/spec/eq-bars-daily
     unique: false
     primary_key: false
