@@ -11,6 +11,6 @@ start_date: "2024-12-01"  # Not able to set up this if period or interval is def
 end_date: "2025-12-10"  # Not able to set up this if period or interval is defined
 format: "df"  # df, csv, parquet
 target_db: "yf_data"  # If you want to store data into a specific root folder
-target_path_stock_price: "jp_fin_report.csv"  # File or table name
+target_path_stock: "jp_fin_report.csv"  # File or table name
 write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
 schema_stock_price: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"  # Output dataframe schema
