@@ -80,10 +80,39 @@ class TestParserCls(unittest.TestCase):
 
         self.test_validator = Validator.model_validate(self.schema_dict)
 
+        self.df_nan = pd.DataFrame(
+            {
+                "Column1": ["123", None, "", "456"],
+                "column2": [1.1, 2.2, None, 4.4],
+                "column3": ["2023-01-01", "2023-02-02", "2023-03-03", None],
+            }
+        )
+
+        self.schema_yaml_nan = """
+        schemas:
+            "Column1":
+                type: Int
+                nullable: true
+                unique: false
+            "column2":
+                type: Float
+                nullable: true
+                unique: false
+            "column3":
+                type: Date
+                nullable: true
+                unique: false
+        """
+
+        self.schema_dict_nan = yaml.safe_load(self.schema_yaml_nan)
+
+        self.test_validator_nan = Validator.model_validate(self.schema_dict_nan)
+
     def test_is_instance(self):
         self.assertIsInstance(self.test_parser_csv, NormalClassRegistery)
         self.assertIsInstance(self.test_parser_xlsx, NormalClassRegistery)
         self.assertIsInstance(self.test_validator, Validator)
+        self.assertIsInstance(self.test_validator_nan, Validator)
 
     def test_load_method(self):
         pd.testing.assert_frame_equal(self.test_parser_csv.load(), self.expected_output)
@@ -102,8 +131,16 @@ class TestParserCls(unittest.TestCase):
     def test_validation(self):
         validated_df_csv = self.test_validator.valid(self.test_parser_csv.parse())
         validated_df_xlsx = self.test_validator.valid(self.test_parser_xlsx.parse())
+        validated_df_nan = self.test_validator_nan.valid(self.df_nan)
         pd.testing.assert_frame_equal(validated_df_csv, self.expected_parsed_output)
         pd.testing.assert_frame_equal(validated_df_xlsx, self.expected_parsed_output)
+        assert pd.isna(validated_df_nan.loc[1, "Column1"])
+        assert pd.isna(validated_df_nan.loc[2, "Column1"])
+        assert validated_df_nan.loc[0, "Column1"] == 123
+        assert pd.isna(validated_df_nan.loc[2, "column2"])
+        assert validated_df_nan.loc[0, "column2"] == 1.1
+        assert pd.isna(validated_df_nan.loc[3, "column3"])
+        assert validated_df_nan.loc[0, "column3"] == pd.to_datetime("2023-01-01").date()
 
 
 def test_load_files_from_dir():

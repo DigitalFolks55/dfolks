@@ -9,7 +9,6 @@ Need to work:
 """
 
 import logging
-import re
 from abc import ABC
 from typing import Dict
 
@@ -51,20 +50,29 @@ class Validator(ABC, BaseModel):
 
         columns = {}
         rename_cols = {}
+        dtypes = {}
 
         for col, dtype in v["schemas"].items():
-            # Need to add: check type in schema if no return error
-            if re.search(r"Int|Float", dtype["type"]):
-                logger.debug(f"Convert column {col} to numeric type")
-                # Convert to numeric type to avoid validation error
-                df[col] = pd.to_numeric(df[col], errors="coerce")
-            elif re.search(r"Date", dtype["type"]):
-                logger.debug(f"Convert column {col} to date type")
-                df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+            dtypes[col] = dtype["type"]
+
+            # Handle nullable integer and float types
+            if dtype["type"] == "Int" and dtype.get("nullable", True):
+                logger.debug(
+                    f"Convert column {col} to pandas nullable Int64 type to allow NaN"
+                )
+                data_type = "Int64"
+            elif dtype["type"] == "Float" and dtype.get("nullable", True):
+                logger.debug(
+                    f"Convert column {col} to pandas nullable Float64 type to allow NaN"
+                )
+                data_type = "Float64"
+            else:
+                # Others: use pandera data types
+                data_type = getattr(pa, dtype["type"])
 
             # Define column schema
             column = pa.Column(
-                getattr(pa, dtype["type"]),
+                data_type,
                 nullable=dtype.get("nullable", True),
                 unique=dtype.get("unique", False),
                 required=True,
@@ -83,8 +91,11 @@ class Validator(ABC, BaseModel):
         logger.info("Retain defined columns in the schema")
         df = df[df_schema.columns.keys()]
 
+        # Enforce data types
+        df = enforce_dtype(df, dtypes)
+
         # Return validated df
-        logger.info("Enforce data type and check nullable and duplicated values")
+        logger.info("Check data type & nullable and duplicated values")
         df_valid = df_schema.validate(df)
 
         # Rename columns if needed
@@ -102,6 +113,8 @@ class Validator(ABC, BaseModel):
 
 def enforce_dtype(df: pd.DataFrame, schema: Dict) -> pd.DataFrame:
     """Enforce data types based on inferred schema."""
+    # Shallow copy to avoid SettingWithCopyWarning
+    df = df.copy()
     # Cast datatypes based on schema; Better way?
     for col in df.columns:
         if schema[col] == "Date":
