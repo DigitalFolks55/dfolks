@@ -1,10 +1,11 @@
 # This is a batch job for financial report ingestion from JQuants
 kind: DataIngestionJQuantsFinReport
 
-corp_filter_col: "ScaleCategory"  # If corp_codes is defined, no need
+latest_data: True
+corp_filter_col: "ScaleCat"  # If corp_codes is defined, no need
 corp_filter: "^TOPIX*"  # If corp_codes is defined, no need
 format: "csv"  # df, csv, parquet
 target_db: "jquants"  # If you want to store data into a specific root folder
 target_path_fin_report: "jp_fin_report.csv"  # File or table name
 write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
-schema: "file://src/dfolks/schema/schema_jquants_fin_report.yaml"  # Output dataframe schema
+schema_fin_report: "file://src/dfolks/schema/schema_jquants_fin_report.yaml"  # Output dataframe schema

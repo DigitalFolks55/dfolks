@@ -15,35 +15,35 @@ schemas:
     unique: false
     primary_key: true
 
-  "AdjustmentOpen":
+  "AdjO":
     type: Float
     new_column: "open_price"
     nullable: false
     unique: false
     primary_key: false
 
-  "AdjustmentHigh":
+  "AdjH":
     type: Float
     new_column: "high_price"
     nullable: false
     unique: false
     primary_key: false
 
-  "AdjustmentLow":
+  "AdjL":
     type: Float
     new_column: "low_price"
     nullable: false
     unique: false
     primary_key: false
 
-  "AdjustmentClose":
+  "AdjC":
     type: Float
     new_column: "close_price"
     nullable: false
     unique: false
     primary_key: false
 
-  "AdjustmentVolume":
+  "AdjVo":
     type: Int
     new_column: "transact_volume"
     nullable: false

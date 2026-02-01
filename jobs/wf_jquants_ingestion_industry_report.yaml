@@ -1,0 +1,8 @@
+kind: DataIngestionJQuantsIndustryReport
+
+latest_data: True
+format: "csv"  # df, csv, parquet
+target_db: "jquants"  # If you want to store data into a specific root folder
+target_path_industry_report: "jp_industry_report.csv"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_industry_report: "file://src/dfolks/schema/schema_jquants_industry_report.yaml"  # Output dataframe schema

@@ -1,14 +1,13 @@
 """API calls to get data from JQUANTS.
+Updated v1 to v2 on 2026-01-25.
+Ref: https://jpx-jquants.com/ja/spec
 
 Need to do
 0) Add more api calls.
 1) Add loggers with HTTP status codes.
 """
 
-import datetime
-import json
 import os
-import pickle
 from pathlib import Path
 
 import pandas as pd
@@ -22,161 +21,163 @@ env_path = Path(__file__).resolve().parents[3] / "env" / ".env"
 load_dotenv(dotenv_path=env_path)
 
 
-def get_jquants_api_refresh_token() -> str:
-    """Get J-Quants API refesh token."""
-    # Get E-mail address & password from .env file
-    data = {
-        "mailaddress": os.getenv("JQUANTS_API_EMAIL_ADDRESS"),
-        "password": os.getenv("JQUANTS_API_PASSWORD"),
-    }
-    # Refresh token request
-    r_post = requests.post(
-        "https://api.jquants.com/v1/token/auth_user", data=json.dumps(data)
-    )
-    # Store refresh token
-    refreshToken = r_post.json().get("refreshToken")
-
-    if not refreshToken:
-        raise ValueError("Failed to retrieve refresh token. Check your credentials.")
-
-    return refreshToken
+def get_jquants_api_key_v2() -> str:
+    """Get J-Quants API key from environment variables."""
+    api_key = os.getenv("JQUANTS_API_KEY")
+    if api_key is None:
+        raise ValueError("JQUANTS_API_KEY not found in environment variables.")
+    return api_key
 
 
-def get_jquants_api_token(refreshToken: str = None) -> str:
-    """Get J-Quants API token."""
-    # If refreshToken is None, get new one
-    if refreshToken is None:
-        refreshToken = get_jquants_api_refresh_token()
-
-    if not refreshToken:
-        raise ValueError("Refresh token is required to get J-Quants API token.")
-
-    jquants_refresh_token = refreshToken
-    # Get idToken
-    r = requests.post(
-        f"https://api.jquants.com/v1/token/auth_refresh?refreshtoken={jquants_refresh_token}"
-    )
-    # Store idToken
-    idToken = r.json().get("idToken")
-
-    if not idToken:
-        raise ValueError(
-            "Failed to retrieve J-Quants API token. Check your refresh token."
-        )
-
-    return idToken
-
-
-def update_jquants_tokens(save_as_file=True) -> str:
-    """Update J-Quants API token if it is expired."""
-    jquants_token_path = os.getenv("JQUANTS_TOKEN_PATH")
-    now = datetime.datetime.now()
-
-    # If a token file (pickle) exists then extract the token from the file
-    if os.path.exists(jquants_token_path):
-        with open(jquants_token_path, "rb") as f:
-            tokens = pickle.load(f)
-            refreshToken_datetime = tokens.get("refreshToken").get("datetime")
-            refreshToken = tokens.get("refreshToken").get("token")
-            idToken_datetime = tokens.get("idToken").get("datetime")
-            idToken = tokens.get("idToken").get("token")
-
-        # If the refresh token is expired (> 7days, but set up 6days), get new refresh tokens
-        if (now - refreshToken_datetime).days >= 6:
-            refreshToken = get_jquants_api_refresh_token()
-        # If the id token is expired (> 1day but set up 23hours), get a new one
-        if (now - idToken_datetime).total_seconds() >= 60 * 60 * 23:
-            idToken = get_jquants_api_token(refreshToken)
-    else:
-        refreshToken = get_jquants_api_refresh_token()
-        idToken = get_jquants_api_token(refreshToken)
-
-    # Save tokens as a pickle file, if variable save_as_file is True
-    if save_as_file:
-        tokens = {
-            "refreshToken": {
-                "datetime": now,
-                "token": refreshToken,
-            },
-            "idToken": {
-                "datetime": now,
-                "token": idToken,
-            },
-        }
-
-        with open(jquants_token_path, "wb") as f:
-            pickle.dump(tokens, f)
-
-    return refreshToken, idToken
-
-
-def get_jquants_corporate_list(idToken: str) -> list:
+def get_jquants_corporate_list_v2(api_key: str) -> list:
     """Get J-Quants corporate list.
 
     Get data at the point of exectuion; date not defined.
     """
 
-    headers = {"Authorization": "Bearer {}".format(idToken)}
-    r = requests.get("https://api.jquants.com/v1/listed/info", headers=headers)
+    if api_key is None:
+        raise ValueError("API key is required to use J-Quants API v2.")
 
-    df = pd.DataFrame(r.json().get("info"))
+    headers = {"x-api-key": api_key}
+    r = requests.get("https://api.jquants.com/v2/equities/master", headers=headers)
+
+    df = pd.DataFrame(r.json().get("data"))
 
     return df
 
 
-def get_jquants_fin_report(idToken: str, code: int, date: str = None) -> pd.DataFrame:
-    """Get J-Quants financial statements."""
+def get_jquants_fin_report_v2(
+    api_key: str, code: int = None, date: str = None
+) -> pd.DataFrame:
+    """Get J-Quants financial statements v2."""
 
-    headers = {"Authorization": "Bearer {}".format(idToken)}
-    if date:
+    if api_key is None:
+        raise ValueError("API key is required to use J-Quants API v2.")
+
+    if code is None and date is None:
+        raise ValueError("At least one of 'code' or 'date' must be provided.")
+
+    headers = {"x-api-key": api_key}
+    # API call based on given parameters
+    if code is None and date is not None:
         r = requests.get(
-            f"https://api.jquants.com/v1/fins/statements?code={code}&date={date}",
+            "https://api.jquants.com/v2/fins/summary",
+            params={"date": date},
+            headers=headers,
+        )
+    elif code is not None and date is None:
+        r = requests.get(
+            "https://api.jquants.com/v2/fins/summary",
+            params={"code": code},
+            headers=headers,
+        )
+    elif code is not None and date is not None:
+        r = requests.get(
+            "https://api.jquants.com/v2/fins/summary",
+            params={"code": code, "date": date},
             headers=headers,
         )
     else:
-        r = requests.get(
-            f"https://api.jquants.com/v1/fins/statements?code={code}", headers=headers
+        raise ValueError(
+            "Process was not properly handled; check whether code and date are correct values and type."
         )
 
-    df = pd.DataFrame(r.json()["statements"])
+    df = pd.DataFrame(r.json()["data"])
 
     return df
 
 
-def get_jquants_stock_price(
-    idToken: str,
-    code: int,
+def get_jquants_stock_price_v2(
+    api_key: str,
+    code: int = None,
     date: str = None,
     date_from: str = None,
     date_to: str = None,
 ) -> pd.DataFrame:
     """Get J-Quants financial statements."""
 
-    if date and (date_from or date_to):
+    if api_key is None:
+        raise ValueError("API key is required to use J-Quants API v2.")
+
+    if code is None and date is None:
+        raise ValueError("At least one of 'code' or 'date' must be provided.")
+    elif code is None and (date_from or date_to):
+        raise ValueError(
+            "If 'date_from' or 'date_to' is provided, 'code' must also be provided."
+        )
+    elif date and (date_from or date_to):
         raise ValueError(
             "Not accepted: 'date' and 'date_from' or 'date_to' at the same time."
         )
 
-    headers = {"Authorization": "Bearer {}".format(idToken)}
-    if date:
-        # With single date
+    headers = {"x-api-key": api_key}
+    # API call based on given parameters
+    if code is not None and date is not None:
         r = requests.get(
-            f"https://api.jquants.com/v1/prices/daily_quotes?code={code}&date={date}",
+            "https://api.jquants.com/v2/equities/bars/daily",
+            params={"code": code, "date": date},
             headers=headers,
         )
-    elif date_from and date_to:
-        # With date range
+    elif code is not None and date_from and date_to:
         r = requests.get(
-            f"https://api.jquants.com/v1/prices/daily_quotes?code={code}&from={date_from}&to={date_to}",
+            "https://api.jquants.com/v2/equities/bars/daily",
+            params={"code": code, "from": date_from, "to": date_to},
+            headers=headers,
+        )
+    elif code is None and date is not None:
+        r = requests.get(
+            "https://api.jquants.com/v2/equities/bars/daily",
+            params={"date": date},
             headers=headers,
         )
     else:
-        # Without dates
         r = requests.get(
-            f"https://api.jquants.com/v1/prices/daily_quotes?code={code}",
+            "https://api.jquants.com/v2/equities/bars/daily",
+            params={"code": code},
             headers=headers,
         )
 
-    df = pd.DataFrame(r.json()["daily_quotes"])
+    df = pd.DataFrame(r.json()["data"])
+
+    return df
+
+
+def get_jquants_industry_report_v2(
+    api_key: str, section: str = None, date_from: str = None, date_to: str = None
+) -> pd.DataFrame:
+    """Get J-Quants industry info v2."""
+
+    if section is None and date_from is None and date_to is None:
+        print(
+            "None of section and date range were provided. All sectors and all dates are used."
+        )
+
+    headers = {"x-api-key": api_key}
+    # API call based on given parameters
+    if section is not None and date_from is not None and date_to is not None:
+        r = requests.get(
+            "https://api.jquants.com/v2/equities/investor-types",
+            params={"section": section, "from": date_from, "to": date_to},
+            headers=headers,
+        )
+    elif section is not None and date_from is None and date_to is None:
+        r = requests.get(
+            "https://api.jquants.com/v2/equities/investor-types",
+            params={"section": section},
+            headers=headers,
+        )
+    elif section is None and date_from is not None and date_to is not None:
+        r = requests.get(
+            "https://api.jquants.com/v2/equities/investor-types",
+            params={"from": date_from, "to": date_to},
+            headers=headers,
+        )
+    else:
+        r = requests.get(
+            "https://api.jquants.com/v2/equities/investor-types",
+            headers=headers,
+        )
+
+    df = pd.DataFrame(r.json().get("data"))
 
     return df

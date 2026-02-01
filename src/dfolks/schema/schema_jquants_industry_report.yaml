@@ -1,0 +1,326 @@
+kind: DfValidator
+
+schemas:
+  "PubDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "StDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "EnDate":
+    type: Date
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "Section":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: true
+
+  "PropSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "PropBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "PropTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "PropBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BrkSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BrkBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BrkTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BrkBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TotSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TotBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TotBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "IndSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "IndBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "IndTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "IndBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "FrgnSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "FrgnBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "FrgnTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "FrgnBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "SecCoSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "SecCoBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "SecCoTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "SecCoBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InvTrSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InvTrBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InvTrTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InvTrBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BusCoSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BusCoBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BusCoTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BusCoBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthCoSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthCoBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthCoTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthCoBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InsCoBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InsCoTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "InsCoBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BankSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BankBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BankTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "BankBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TrstBnkSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TrstBnkBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TrstBnkTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "TrstBnkBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthFinSell":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthFinBuy":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthFinTot":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "OthFinBal":
+    type: Float
+    nullable: false
+    unique: false
+    primary_key: false
