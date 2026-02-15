@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from dfolks.utils.custom_transformers import RemoveNanColsTransformer
+from dfolks.process.custom_transformers import RemoveNanColsTransformer
 
 
 def test_transform_removes_columns_above_threshold():
