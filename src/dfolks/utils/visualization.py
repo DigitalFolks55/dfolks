@@ -16,16 +16,19 @@ def plot_candlestick_stockprice(
     code=None,
     ui_setting="browser",
 ):
+    "Simple candlestick chart for stock price with volume bars using Plotly."
 
+    # Filter dataframe for the specified stock code if provided
     if code is not None:
         df = df[df[code_col] == code]
 
+    # set up Plotly renderer based on user preference (e.g., "browser", "notebook", "plotly_mimetype", etc.)
     if ui_setting is not None:
         import plotly.io as pio
 
         pio.renderers.default = ui_setting
 
-    # Figure
+    # Configurate figure
     fig = make_subplots(
         rows=2,
         cols=1,
@@ -34,7 +37,7 @@ def plot_candlestick_stockprice(
         vertical_spacing=0.03,
     )
 
-    # Candlestick
+    # Add candlestick for stock price
     fig.add_trace(
         go.Candlestick(
             x=df[date_col],
@@ -48,7 +51,7 @@ def plot_candlestick_stockprice(
         col=1,
     )
 
-    # Volume bars
+    # Add volume bars
     fig.add_trace(
         go.Bar(
             x=df[date_col],
