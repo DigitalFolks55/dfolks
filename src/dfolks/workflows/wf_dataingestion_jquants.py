@@ -406,9 +406,9 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             # Apply corporation filter if defined.
             if v["corp_filter"]:
                 corp_lists = corp_lists[
-                    corp_lists[v["corp_filter_col"]]
-                    .astype(str)
-                    .str.contains(v["corp_filter"], regex=True, na=False)
+                    corp_lists[v["corp_filter_col"]].astype(str)
+                    # .str.contains(v["corp_filter"], regex=True, na=False)
+                    .str.match(v["corp_filter"], na=False)
                 ]["Code"].tolist()
                 logger.info(f"Total {len(corp_lists)} corporations after filtering.")
             else:
