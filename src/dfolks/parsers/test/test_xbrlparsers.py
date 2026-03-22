@@ -59,20 +59,25 @@ def mock_model_xbrl():
 
 
 def test_parse_edinet_xbrl(mock_model_xbrl):
-    parser = EdinetXbrlParser(model_xbrl=mock_model_xbrl)
+    parser = EdinetXbrlParser(
+        model_xbrl=mock_model_xbrl, ingestion_source="mock_file.xbrl"
+    )
     df = parser.parse()
 
     # --- Assertions ---
     assert not df.empty
-    assert "net_sales" in df.columns
-    assert "operating_profit" in df.columns
-    assert "profit" in df.columns
+    assert "Net sales" in df.columns
+    assert "Operating profit" in df.columns
+    assert "Profit" in df.columns
 
     # Check metadata columns
-    assert df["stock_code"].iloc[0] == "7203"
-    assert df["edinet_code"].iloc[0] == "E00001"
-    assert df["account_standard"].iloc[0] == "Japan GAAP"
+    assert df["Ticker"].iloc[0] == "7203"
+    assert df["Edinet code"].iloc[0] == "E00001"
+    assert df["Account standard"].iloc[0] == "Japan GAAP"
+    assert df["Period start date"].iloc[0] == "2024-04-01"
+    assert df["Period end date"].iloc[0] == "2025-03-31"
+    assert df["Ingestion source"].iloc[0] == "mock_file.xbrl"
 
     # Check numeric conversion
-    assert pd.api.types.is_numeric_dtype(df["net_sales"])
-    assert df["net_sales"].iloc[0] == 100000
+    assert pd.api.types.is_numeric_dtype(df["Net sales"])
+    assert df["Net sales"].iloc[0] == 100000

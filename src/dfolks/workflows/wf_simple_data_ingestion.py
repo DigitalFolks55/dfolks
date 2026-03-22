@@ -71,11 +71,13 @@ class DataIngestionWorkflow(WorkflowsRegistry, ExternalFileMixin):
 
     def run(self):
         """Execute workflow"""
-        v = self.variables
-
         # Set up a logger.
         logger = self.logger
         logger.info("Start Data Ingestion Workflow")
+
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
 
         # Load a parser class.
         logger.info(f"Parsing raw data by '{v["parser"]["kind"]}'")  # add cls name

@@ -1,0 +1,16 @@
+# This is a batch job for financial report ingestion from EDINET
+kind: DataIngestionEdinet
+
+corp_codes: # If it is not defined, then using corp list from JQuants
+  - "80020"
+  - "83160"
+corp_filter_col: "ScaleCat"  # If corp_codes is defined, no need
+corp_filter: "^TOPIX*"  # If corp_codes is defined, no need
+start_date: "2020-01-01"
+end_date: "2023-12-31"
+# temp_folder_path: "temp/edinet"  # Temporary folder to store downloaded files
+format: "csv"  # df, csv, parquet
+target_db: "edinet"  # If you want to store data into a specific root folder
+target_path_fin_report: "jp_fin_report.csv"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_fin_report: "file://src/dfolks/schema/schema_edinet_fin_report.yaml"  # Output dataframe schema
