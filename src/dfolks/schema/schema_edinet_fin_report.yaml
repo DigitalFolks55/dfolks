@@ -1,141 +1,128 @@
 kind: DfValidator
 
 schemas:
-  "DiscDate":
-    type: Date
-    nullable: false
-    unique: false
-    primary_key: false
-
-  "Code":
-    type: String
-    new_column: "Ticker"
-    nullable: false
-    unique: false
-    primary_key: true
-
-  "DiscNo":
-    type: String
-    nullable: false
-    unique: true
-    primary_key: false
-
-  "DocType":
+  "Ticker":
     type: String
     nullable: false
     unique: false
     primary_key: true
 
-  "CurPerType":
+  "Edinet code":
     type: String
     nullable: false
     unique: false
     primary_key: true
 
-  "CurPerSt":
+  "Period start date":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "CurPerEn":
+  "Period end date":
     type: Date
     nullable: false
     unique: false
     primary_key: true
 
-  "CurFYSt":
-    type: Date
+  "Account standard":
+    type: String
     nullable: false
     unique: false
-    primary_key: true
+    primary_key: false
 
-  "CurFYEn":
-    type: Date
-    nullable: false
-    unique: false
-    primary_key: true
-
-  "Sales":  # 売上高
+  "Net sales":
     type: Float
     nullable: false
     unique: false
     primary_key: false
 
-  "OP":  # 営業利益
+  "Operating profit":
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "OdP":  # 経常利益
+  "Earnings before interest and taxes":
     type: Float
     nullable: true
     unique: false
     primary_key: false
 
-  "NP":  # 当期純利益
+  "Profit":
     type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Comprehensive profit":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Operating cashflow":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Investing cashflow":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Financing cashflow":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Equity":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Total assests":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Equity to assets":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Book value per share":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Earning per share":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Price earnings ratios":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Employees":
+    type: Float
+    nullable: true
+    unique: false
+    primary_key: false
+
+  "Ingestion source":
+    type: String
     nullable: false
-    unique: false
-    primary_key: false
-
-  "EPS":  # 一株当たり当期純利益
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "DEPS":  # 潜在株式調整後一株あたり当期純利益
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "TA":  # 総資産
-    type: Float
-    nullable: false
-    unique: false
-    primary_key: false
-
-  "Eq":  # 純資産
-    type: Float
-    nullable: false
-    unique: false
-    primary_key: false
-
-  "EqAR":  # 自己資本比率
-    type: Float
-    nullable: false
-    unique: false
-    primary_key: false
-
-  "BPS":  # 一株当たり純資産
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "CFO":  # 営業活動によるキャッシュフロー
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "CFI":  # 投資活動によるキャッシュフロー
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "CFF":  # 財務活動によるキャッシュフロー
-    type: Float
-    nullable: true
-    unique: false
-    primary_key: false
-
-  "CashEq":  # 現金及び現金同等物
-    type: Float
-    nullable: true
     unique: false
     primary_key: false

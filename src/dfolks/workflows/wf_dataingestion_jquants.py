@@ -354,11 +354,12 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
     def run(self) -> None:
         """Execute workflow."""
-        self.logger.info("Starting data ingestion workflow for JQuants.")
-        # Get variables.
-        v = self.variables
         # Get a logger.
         logger = self.logger
+        logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
 
         # If start_date & end_date are defined, generate date range.
         if v["start_date"] and v["end_date"]:
@@ -399,6 +400,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                     time.sleep(1)  # To avoid hitting rate limits.
                 time.sleep(1)  # To avoid hitting rate limits.
 
+            logger.info("Combining data into one dataframe")
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         else:
@@ -435,6 +437,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
                     time.sleep(1)  # To avoid hitting rate limits.
                 time.sleep(1)  # To avoid hitting rate limits.
 
+            logger.info("Combining data into one dataframe")
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         if stock_prices_df.empty:
@@ -442,6 +445,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             return
 
         # Validate dataframe against schema.
+        logger.info("Apply dataframe validator for parsed dataframe")
         df_valid = Validator.model_validate(v["schema_stock_price"]).valid(
             stock_prices_df
         )
@@ -549,11 +553,12 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
 
     def run(self) -> None:
         """Execute workflow."""
-        self.logger.info("Starting data ingestion workflow for JQuants.")
-        # Get variables.
-        v = self.variables
         # Get a logger.
         logger = self.logger
+        logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
 
         # If neither start_date nor end_date is defined, set date range to last 1 week.
         if v["latest_data"]:
@@ -578,6 +583,7 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
             return
 
         # Validate dataframe against schema.
+        logger.info("Apply dataframe validator for parsed dataframe")
         df_valid = Validator.model_validate(v["schema_industry_report"]).valid(
             industry_report_df
         )

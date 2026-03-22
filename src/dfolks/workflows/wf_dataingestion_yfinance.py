@@ -141,17 +141,20 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
 
     def run(self) -> None:
         """Execute workflow."""
-        self.logger.info("Starting data ingestion workflow for JQuants.")
-        # Get variables.
-        v = self.variables
         # Get a logger.
         logger = self.logger
+        logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
 
         if v["cut_date"] is None:
             cut_date = datetime.datetime.today() - datetime.timedelta(days=30)
             cut_date = cut_date.strftime("%Y-%m-%d")
         else:
             cut_date = v["cut_date"]
+
+        logger.info(f"Data ingestion after {cut_date}.")
 
         income_statements = []
         balance_sheets = []
@@ -172,6 +175,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                 dividends_reports.append(dividends)
                 time.sleep(1)  # To avoid hitting rate limits.
 
+            logger.info("Combining documents into one dataframe")
             income_statements_df = pd.concat(income_statements, ignore_index=True)
             balance_sheets_df = pd.concat(balance_sheets, ignore_index=True)
             cash_flows_df = pd.concat(cash_flows, ignore_index=True)
@@ -207,6 +211,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                 dividends_reports.append(dividends)
                 time.sleep(1)  # To avoid hitting rate limits.
 
+            logger.info("Combining documents into one dataframe")
             income_statements_df = pd.concat(income_statements, ignore_index=True)
             balance_sheets_df = pd.concat(balance_sheets, ignore_index=True)
             cash_flows_df = pd.concat(cash_flows, ignore_index=True)
@@ -232,6 +237,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
             return
 
         if v["missing_col_impute"]:
+            logger.info("Imputing missing columns.")
             # Add missing columns based on schema.
             for col in v["schema_income_statement"]["schemas"].keys():
                 if col not in income_statements_df.columns:
@@ -247,6 +253,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                     dividends_reports_df[col] = None
 
         # Validate dataframe against schema.
+        logger.info("Apply dataframe validator for parsed dataframe")
         income_statements_df_vaid = Validator.model_validate(
             v["schema_income_statement"]
         ).valid(income_statements_df)
@@ -429,11 +436,12 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
     def run(self) -> None:
         """Execute workflow."""
-        self.logger.info("Starting data ingestion workflow for JQuants.")
-        # Get variables.
-        v = self.variables
         # Get a logger.
         logger = self.logger
+        logger.info("Starting data ingestion workflow for JQuants.")
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
 
         stock_prices = []
 
@@ -494,6 +502,7 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
             stock_prices.append(stock_price)
             time.sleep(1)  # To avoid hitting rate limits.
 
+            logger.info("Combining parsed data into one DataFrame.")
             stock_prices_df = pd.concat(stock_prices, ignore_index=True)
 
         if stock_prices_df.empty:
@@ -503,6 +512,7 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
         stock_prices_df["ticker"] = stock_prices_df["ticker"].str.replace(".T", "0")
 
         # Validate dataframe against schema.
+        logger.info("Apply dataframe validator for parsed dataframe")
         stock_prices_df_vaid = Validator.model_validate(v["schema_stock_price"]).valid(
             stock_prices_df
         )

@@ -3,13 +3,14 @@ kind: DfValidator
 schemas:
   "date":
     type: Date
+    new_column: "Date"
     nullable: false
     unique: false
     primary_key: true
 
   "ticker":
     type: String
-    new_column: "local_code"
+    new_column: "Ticker"
     nullable: false
     unique: false
     primary_key: true

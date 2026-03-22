@@ -1,4 +1,4 @@
 [flake8]
-max-line-length = 119
-max-doc-length = 119
+max-line-length = 120
+max-doc-length = 120
 extend-ignore = E203

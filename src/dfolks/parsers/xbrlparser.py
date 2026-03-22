@@ -23,11 +23,14 @@ class EdinetXbrlParser(NormalClassRegistery):
     ----------
     model_xbrl: XBRL model.
         Any
+    ingestion_source: Source of ingestion, e.g. file name.
+        str
     ----------
     """
 
     nmclss: ClassVar[str] = "EdinetXbrlParser"
     model_xbrl: Any
+    ingestion_source: str
 
     @property
     def variables(self) -> Dict:
@@ -37,48 +40,90 @@ class EdinetXbrlParser(NormalClassRegistery):
     def _tag_lists(self) -> Dict:
         tag_dict = {
             "Japan GAAP": {
-                "NetSalesSummaryOfBusinessResults": "net_sales",
-                "OrdinaryIncomeSummaryOfBusinessResults": "net_sales",
-                "OperatingIncome": "operating_profit",
-                "OperatingRevenue1": "operating_profit",
-                "IncomeBeforeIncomeTaxes": "earnings_before_interest_taxes",
-                "ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults": "profit",
-                "ComprehensiveIncomeSummaryOfBusinessResults": "comprehensive_profit",
-                "NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults": "operating_cash_flow",
-                "NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults": "investment_cash_flow",
-                "NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults": "financing_cash_flow",
-                "CashAndCashEquivalentsSummaryOfBusinessResults": "cash_equivalents",
-                "NetAssetsSummaryOfBusinessResults": "equity",
-                "TotalAssetsSummaryOfBusinessResults": "total_assets",
-                "EquityToAssetRatioSummaryOfBusinessResults": "equity_to_assets",
-                "NetAssetsPerShareSummaryOfBusinessResults": "book_value_per_share",
-                "BasicEarningsLossPerShareSummaryOfBusinessResults": "earnings_per_share",
-                "PriceEarningsRatioSummaryOfBusinessResults": "price_earnings_ratios",
-                "NumberOfEmployees": "employees",
+                "NetSalesSummaryOfBusinessResults": "Net sales",  # 売上高
+                "OrdinaryIncomeSummaryOfBusinessResults": "Net sales",  # 売上高
+                "OperatingRevenue1SummaryOfBusinessResults": "Net sales",  # 売上高
+                "OperatingRevenue2SummaryOfBusinessResults": "Net sales",  # 売上高
+                "RevenueKeyFinancialData": "Net sales",  # 売上高
+                "RevenueSummaryOfBusinessResults": "Net sales",  # 売上高
+                "OperatingIncomeINS": "Net sales",  # 売上高
+                "OperatingIncome": "Operating profit",  # 営業利益
+                "OperatingRevenue1": "Operating profit",  # 営業利益
+                "IncomeBeforeIncomeTaxes": "Earnings before interest and taxes",  # 税引前利益
+                "ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults": "Profit",  # 当期純利益
+                "NetIncomeLossSummaryOfBusinessResults": "Profit",  # 当期純利益
+                "ComprehensiveIncomeSummaryOfBusinessResults": "Comprehensive profit",  # 包括利益
+                "NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults": "Operating cashflow",
+                # 営業活動によるキャッシュフロー
+                "NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults": "Investing cashflow",
+                # 投資活動によるキャッシュフロー
+                "NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults": "Financing cashflow",
+                # 財務活動によるキャッシュフロー
+                "CashAndCashEquivalentsSummaryOfBusinessResults": "Cash equilavents",  # 現金及び現金同等物
+                "NetAssetsSummaryOfBusinessResults": "Equity",  # 純資産
+                "TotalAssetsSummaryOfBusinessResults": "Total assests",  # 総資産
+                "EquityToAssetRatioSummaryOfBusinessResults": "Equity to assets",  # 自己資本比率
+                "NetAssetsPerShareSummaryOfBusinessResults": "Book value per share",  # 一株当たり純資産, BPS
+                "BasicEarningsLossPerShareSummaryOfBusinessResults": "Earning per share",  # 一株当たり当期純利益, EPS
+                "PriceEarningsRatioSummaryOfBusinessResults": "Price earnings ratios",  # 株価収益率, PER
+                "NumberOfEmployees": "Employees",  # 従業員
             },
             "IFRS": {
-                "RevenueIFRSSummaryOfBusinessResults": "net_sales",
-                "SalesAndFinancialServicesRevenueIFRSKeyFinancialData": "net_sales",
-                "OperatingRevenuesIFRSKeyFinancialData": "net_sales",
-                "OperatingProfitLossIFRSKeyFinancialData": "operating_profit",
-                "OperatingProfitLossIFRS": "operating_profit",
-                "ProfitLossBeforeTaxIFRSSummaryOfBusinessResults": "earnings_before_interest_taxes",
-                "ProfitLossBeforeTaxIFRS": "earnings_before_interest_taxes",
-                "ProfitBeforeFinancingAndIncomeTaxIFRSKeyFinancialData": "earnings_before_interest_taxes",
-                "ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults": "profit",
-                "ComprehensiveIncomeAttributableToOwnersOfParentIFRSSummaryOfBusinessResults": "comprehensive_profit",
-                "ComprehensiveIncomeIFRSSummaryOfBusinessResults": "comprehensive_profit",
-                "CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults": "operating_cash_flow",
-                "CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults": "investment_cash_flow",
-                "CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults": "financing_cash_flow",
-                "CashAndCashEquivalentsIFRSSummaryOfBusinessResults": "cash_equivalents",
-                "EquityIFRS": "equity",
-                "TotalAssetsIFRSSummaryOfBusinessResults": "total_assets",
-                "RatioOfOwnersEquityToGrossAssetsIFRSSummaryOfBusinessResults": "equity_to_assets",
-                "EquityToAssetRatioIFRSSummaryOfBusinessResults": "book_value_per_share",
-                "BasicEarningsLossPerShareIFRSSummaryOfBusinessResults": "earnings_per_share",
-                "PriceEarningsRatioIFRSSummaryOfBusinessResults": "price_earnings_ratios",
-                "NumberOfEmployees": "employees",
+                "RevenueIFRSSummaryOfBusinessResults": "Net sales",  # 売上高
+                "SalesAndFinancialServicesRevenueIFRSKeyFinancialData": "Net sales",  # 売上高
+                "OperatingRevenuesIFRSKeyFinancialData": "Net sales",  # 売上高
+                "NetSalesIFRSKeyFinancialData": "Net sales",  # 売上高
+                "NetSalesIFRSSummaryOfBusinessResults": "Net sales",  # 売上高
+                "InsuranceRevenueIFRSKeyFinancialData": "Net sales",  # 売上高
+                "OperatingProfitLossIFRSKeyFinancialData": "Operating profit",  # 営業利益
+                "OperatingProfitLossIFRS": "Operating profit",  # 営業利益
+                "ProfitLossBeforeTaxIFRSSummaryOfBusinessResults": "Earnings before interest and taxes",  # 税引前利益
+                "ProfitLossBeforeTaxIFRS": "Earnings before interest and taxes",  # 税引前利益
+                "ProfitBeforeFinancingAndIncomeTaxIFRSKeyFinancialData": "Earnings before interest and taxes",  # 税引前利益
+                "ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults": "Profit",  # 当期純利益
+                "ComprehensiveIncomeAttributableToOwnersOfParentIFRSSummaryOfBusinessResults": "Comprehensive profit",
+                # 包括利益
+                "ComprehensiveIncomeIFRSSummaryOfBusinessResults": "Comprehensive profit",  # 包括利益
+                "CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults": "Operating cashflow",
+                # 営業活動によるキャッシュフロー
+                "CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults": "Investing cashflow",
+                # 投資活動によるキャッシュフロー
+                "CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults": "Financing cashflow",
+                # 財務活動によるキャッシュフロー
+                "CashAndCashEquivalentsIFRSSummaryOfBusinessResults": "Cash equilavents",  # 現金及び現金同等物
+                "EquityIFRS": "Equity",  # 純資産
+                "TotalAssetsIFRSSummaryOfBusinessResults": "Total assests",  # 総資産
+                "RatioOfOwnersEquityToGrossAssetsIFRSSummaryOfBusinessResults": "Equity to assets",  # 自己資本比率
+                "EquityToAssetRatioIFRSSummaryOfBusinessResults": "Book value per share",  # 一株当たり純資産, BPS
+                "BasicEarningsLossPerShareIFRSSummaryOfBusinessResults": "Earning per share",  # 一株当たり当期純利益, EPS
+                "PriceEarningsRatioIFRSSummaryOfBusinessResults": "Price earnings ratios",  # 株価収益率, PER
+                "NumberOfEmployees": "Employees",  # 従業員
+            },
+            "US GAAP": {
+                "RevenuesUSGAAPSummaryOfBusinessResults": "Net sales",  # 売上高
+                "OperatingIncomeLossUSGAAPSummaryOfBusinessResults": "Operating profit",  # 営業利益
+                "ProfitLossBeforeTaxUSGAAPSummaryOfBusinessResults": "Earnings before interest and taxes",  # 税引前利益
+                "NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults": "Profit",  # 当期純利益
+                "ComprehensiveIncomeUSGAAPSummaryOfBusinessResults": "Comprehensive profit",  # 包括利益
+                "ComprehensiveIncomeAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults": "Comprehensive profit",
+                # 包括利益
+                "CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults": "Operating cashflow",
+                # 営業活動によるキャッシュフロー
+                "CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults": "Investing cashflow",
+                # 投資活動によるキャッシュフロー
+                "CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults": "Financing cashflow",
+                # 財務活動によるキャッシュフロー
+                "CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults": "Cash equilavents",  # 現金及び現金同等物
+                "EquityIncludingPortionAttributableToNonControllingInterestUSGAAPSummaryOfBusinessResults": "Equity",
+                # 純資産
+                "NetAssetsSummaryOfBusinessResults": "Equity",  # 純資産
+                "TotalAssetsUSGAAPSummaryOfBusinessResults": "Total assests",  # 総資産
+                "EquityToAssetRatioUSGAAPSummaryOfBusinessResults": "Equity to assets",  # 自己資本比率
+                "EquityAttributableToOwnersOfParentPerShareUSGAAPSummaryOfBusinessResults": "Book value per share",
+                # 一株当たり純資産, BPS
+                "BasicEarningsLossPerShareUSGAAPSummaryOfBusinessResults": "Earning per share",  # 一株当たり当期純利益, EPS
+                "PriceEarningsRatioUSGAAPSummaryOfBusinessResults": "Price earnings ratios",  # 株価収益率, PER
+                "NumberOfEmployees": "Employees",  # 従業員
             },
         }
 
@@ -92,6 +137,7 @@ class EdinetXbrlParser(NormalClassRegistery):
         rows = []
         df = []
 
+        logger.info("Map common metadata from XBRL files.")
         for fct in self.model_xbrl.facts:
             if fct.concept.qname.localName == "SecurityCodeDEI":
                 stock_code = fct.value
@@ -108,48 +154,67 @@ class EdinetXbrlParser(NormalClassRegistery):
             if fct.concept.qname.localName == "CurrentFiscalYearEndDateDEI":
                 fy_end_date = fct.value
 
+        logger.info("Map financial data from XBRL files.")
         for fct in self.model_xbrl.facts:
             tag_dicts = tag_dict.get(acc_standard, {})
             if len(tag_dicts) == 0:
-                logging.error(
-                    f"No tags defined for accounting standard: {acc_standard}"
-                )
+                logger.error(f"No tags defined for accounting standard: {acc_standard}")
                 continue
             else:
                 lists = tag_dicts.keys()
             if fct.concept.qname.localName in lists:
-                if fct.contextID.endswith(
-                    "CurrentYearDuration"
-                ) or fct.contextID.endswith("CurrentYearInstant"):
+                if (
+                    fct.contextID.endswith("CurrentYearDuration")
+                    or fct.contextID.endswith(
+                        "CurrentYearDuration_NonConsolidatedMember"
+                    )
+                    or fct.contextID.endswith("CurrentYearInstant")
+                    or fct.contextID.endswith(
+                        "CurrentYearInstant_NonConsolidatedMember"
+                    )
+                ):
                     rows.append(
                         {
-                            "stock_code": stock_code,
-                            "edinet_code": edinet_code,
+                            "Ticker": stock_code,
+                            "Edinet code": edinet_code,
                             "attribute": tag_dicts.get(fct.concept.qname.localName),
                             "label": fct.concept.label(),
                             "context": fct.contextID,
                             "value": fct.value,
-                            "period_start_date": fy_start_date,
-                            "period_end_date": fy_end_date,
+                            "Period start date": fy_start_date,
+                            "Period end date": fy_end_date,
                             "unit": fct.unitID,
-                            "account_standard": acc_standard,
+                            "Account standard": acc_standard,
                         }
                     )
 
+        logger.info(
+            f"Total {len(rows)} financial data points extracted from XBRL file."
+        )
         df.append(pd.DataFrame(rows))
-
+        logger.info("Combine extracted data into one DataFrame.")
         df = pd.concat(df, ignore_index=True).drop_duplicates()
+
+        if df.empty:
+            logger.warning("No data extracted from XBRL file.")
+            return pd.DataFrame()  # Return empty DataFrame if no data was extracted
+
+        logger.info("Pivoting DataFrame to have attributes as columns.")
         df["value"] = pd.to_numeric(df["value"], errors="coerce")
         df_pivot = df.pivot_table(
             index=[
-                "stock_code",
-                "edinet_code",
-                "period_start_date",
-                "period_end_date",
-                "account_standard",
+                "Ticker",
+                "Edinet code",
+                "Period start date",
+                "Period end date",
+                "Account standard",
             ],
             columns="attribute",
             values="value",
         ).reset_index()
+
+        df_pivot["Ingestion source"] = self.ingestion_source
+
+        logger.info("Finished parsing XBRL file and pivoting DataFrame.")
 
         return df_pivot

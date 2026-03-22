@@ -9,7 +9,6 @@ schemas:
 
   "ticker":
     type: String
-    new_column: "local_code"
     nullable: false
     unique: false
     primary_key: true
