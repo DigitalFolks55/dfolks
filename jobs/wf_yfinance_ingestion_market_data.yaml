@@ -1,0 +1,15 @@
+# This is a workflow for market data ingestion from Yahoo Finance
+kind: DataIngestionYFinanceMarketData
+
+corp_codes:  # Must have
+ - "^N225"  # Nikkei 225
+ - "^GSPC"  # S&P 500
+ - "CL=F"  # Crude Oil WTI
+ - "GC=F"  # Gold
+ - "USDJPY=X"  # USD/JPY exchange rate
+format: "csv"  # df, csv, parquet
+target_db: "yf_data"  # If you want to store data into a specific root folder
+target_path_market_data: "jp_market_data.csv"  # File or table name
+write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
+schema_market_data: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"  # Output dataframe schema
+ingestion_source: "Yahoo Finance"  # Data source for metadata

@@ -23,7 +23,7 @@ from pydantic import Field
 
 from dfolks.core.classfactory import WorkflowsRegistry
 from dfolks.core.mixin import ExternalFileMixin
-from dfolks.data.data import Validator
+from dfolks.data.data import Validator, add_ingestion_metadata
 from dfolks.data.edinet_apis import download_edinet_documents, get_edinet_document_list
 from dfolks.data.jquants_apis import (
     get_jquants_api_key_v2,
@@ -54,6 +54,8 @@ class DataIngestionEdinet(WorkflowsRegistry, ExternalFileMixin):
     ----------
 
     Variables
+    status: Execute this workflow or not
+        bool = True
     corp_codes: List of corporate codes to ingest data for.
         List[str] = None
     start_date: Start date for data ingestion in 'YYYY-MM-DD' format.
@@ -68,11 +70,15 @@ class DataIngestionEdinet(WorkflowsRegistry, ExternalFileMixin):
         Optional[str] = None
     target_path_fin_report: Full file path to save the financial report data.
         Optional[str] = None
+    ingestion_source: Data source.
+        str
     ----------
     """
 
     wfclss: ClassVar[str] = "DataIngestionEdinet"
 
+    kind: str = "DataIngestionEdinet"
+    status: bool = True
     corp_codes: List[str] = None
     corp_filter_col: str = None
     corp_filter: str = None
@@ -84,6 +90,7 @@ class DataIngestionEdinet(WorkflowsRegistry, ExternalFileMixin):
     target_path_fin_report: Optional[str] = None
     write_mode: str = "overwrite"
     schema_fin_report: Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: str
 
     def date_range(self, start_date, end_date):
         """Generate date range."""
@@ -184,9 +191,7 @@ class DataIngestionEdinet(WorkflowsRegistry, ExternalFileMixin):
                     model_manager = ModelManager.initialize(ctrl)
                     model_xbrl = model_manager.load(file)
 
-                    parser = EdinetXbrlParser(
-                        model_xbrl=model_xbrl, ingestion_source=file
-                    )
+                    parser = EdinetXbrlParser(model_xbrl=model_xbrl, source_path=file)
 
                     dfs.append(parser.parse())
                     logger.info(f"Finished parsing file: {file}")
@@ -218,13 +223,16 @@ class DataIngestionEdinet(WorkflowsRegistry, ExternalFileMixin):
                 model_manager = ModelManager.initialize(ctrl)
                 model_xbrl = model_manager.load(file)
 
-                parser = EdinetXbrlParser(model_xbrl=model_xbrl, ingestion_source=file)
+                parser = EdinetXbrlParser(model_xbrl=model_xbrl, source_path=file)
 
                 dfs.append(parser.parse())
                 logger.info(f"Finished parsing file: {file}")
 
             logger.info("Combining parsed data into one DataFrame.")
             dfs = pd.concat(dfs, ignore_index=True)
+
+        # Add metadata of data ingestion.
+        dfs = add_ingestion_metadata(dfs, v["ingestion_source"])
 
         # Validate dataframe against schema.
         logger.info("Apply dataframe validator for parsed dataframe")

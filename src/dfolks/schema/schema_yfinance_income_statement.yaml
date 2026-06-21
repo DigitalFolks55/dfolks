@@ -239,3 +239,9 @@ schemas:
     type: Float
     nullable: true
     unique: false
+
+  "ingestion_source":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: false

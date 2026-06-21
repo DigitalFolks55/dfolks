@@ -10,6 +10,7 @@ Need to work:
 
 import logging
 from abc import ABC
+from datetime import datetime
 from typing import Dict
 
 import pandas as pd
@@ -154,4 +155,13 @@ def fillna_dataframe_numeric_cols(df: pd.DataFrame, fillna_dict: Dict) -> pd.Dat
         }
     )
 
+    return df
+
+
+def add_ingestion_metadata(df: pd.DataFrame, source: str = None) -> pd.DataFrame:
+    """Add ingestion metadata to the DataFrame."""
+    df = df.copy()  # Shallow copy to avoid modifying original DataFrame
+    df["ingestion_datetime"] = datetime.now().replace(microsecond=0)
+    if source is not None:
+        df["ingestion_source"] = source
     return df

@@ -18,7 +18,10 @@ from pydantic import Field, field_validator
 
 from dfolks.core.classfactory import WorkflowsRegistry
 from dfolks.core.mixin import ExternalFileMixin
-from dfolks.data.data import Validator
+from dfolks.data.data import (
+    Validator,
+    add_ingestion_metadata,
+)
 from dfolks.data.jquants_apis import (
     get_jquants_api_key_v2,
     get_jquants_corporate_list_v2,
@@ -27,9 +30,9 @@ from dfolks.data.output import SaveFile
 from dfolks.data.yfinance_apis import (
     get_yfinance_balance_sheet,
     get_yfinance_cash_flow,
+    get_yfinance_data,
     get_yfinance_dividends,
     get_yfinance_income_statement,
-    get_yfinance_stock_prices,
 )
 from dfolks.utils.utils import extract_primary_keys
 
@@ -84,6 +87,8 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
         Optional[Dict] = Field(description="data_schema_cash_flow.", default=None)
     schema_dividends: Output data schema of income statement.
         Optional[Dict] = Field(description="data_schema_dividends.", default=None)
+    ingestion_source: Data source.
+        str
     ----------
     """
 
@@ -91,6 +96,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
     wfclss: ClassVar[str] = "DataIngestionYFinanceFinReport"
 
     kind: str = "DataIngestionYFinanceFinReport"
+    status: bool = True
     corp_codes: List[str] = None
     corp_filter_col: str = None
     corp_filter: str = None
@@ -115,6 +121,7 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
     schema_dividends: Optional[Dict] = Field(
         description="data_schema_dividends.", default=None
     )
+    ingestion_source: str
 
     @field_validator("corp_filter", mode="before")
     def _check_corp_filter(cls, value, valid_values):
@@ -143,7 +150,9 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
         """Execute workflow."""
         # Get a logger.
         logger = self.logger
-        logger.info("Starting data ingestion workflow for JQuants.")
+        logger.info(
+            "Starting data ingestion workflow of finance reports via Yahoo Finance."
+        )
         # Get variables.
         logger.info("Retrieving workflow variables.")
         v = self.variables
@@ -252,6 +261,18 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
                 if col not in dividends_reports_df.columns:
                     dividends_reports_df[col] = None
 
+        # Add metadata of data ingestion.
+        income_statements_df = add_ingestion_metadata(
+            income_statements_df, v["ingestion_source"]
+        )
+        balance_sheets_df = add_ingestion_metadata(
+            balance_sheets_df, v["ingestion_source"]
+        )
+        cash_flows_df = add_ingestion_metadata(cash_flows_df, v["ingestion_source"])
+        dividends_reports_df = add_ingestion_metadata(
+            dividends_reports_df, v["ingestion_source"]
+        )
+
         # Validate dataframe against schema.
         logger.info("Apply dataframe validator for parsed dataframe")
         income_statements_df_vaid = Validator.model_validate(
@@ -325,9 +346,9 @@ class DataIngestionYFinanceFinReport(WorkflowsRegistry, ExternalFileMixin):
 
 
 class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
-    """Workflow for annual data ingestion via Yahoo Finance.
+    """Workflow for daily stock price data ingestion via Yahoo Finance.
 
-    Description: Financial Report Data Ingestion via Yahoo Finance API.
+    Description: Stock Price Data Ingestion via Yahoo Finance API.
 
     Key methods
     ----------
@@ -361,8 +382,10 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
         Optional[str] = None
     write_mode: File write mode.
         str = "overwrite"
-    schema_stock: Output data schema of stock price.
+    schema_stock_price: Output data schema of stock price.
         Optional[Dict] = Field(description="data_schema_stock_price.", default=None)
+    ingestion_source: Data source.
+        str
     ----------
     """
 
@@ -370,6 +393,7 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
     wfclss: ClassVar[str] = "DataIngestionYFinanceStockPrice"
 
     kind: str = "DataIngestionYFinanceStockPrice"
+    status: bool = True
     corp_codes: List[str] = None
     corp_filter_col: str = None
     corp_filter: str = None
@@ -384,6 +408,7 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
     schema_stock_price: Optional[Dict] = Field(
         description="data_schema_stock_price.", default=None
     )
+    ingestion_source: str
 
     @field_validator("period", mode="before")
     def _check_period(cls, value, valid_values):
@@ -420,13 +445,13 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
     ):
         """Fetch data via Yahoo finance."""
         if start_date is not None and end_date is not None:
-            stock_price = get_yfinance_stock_prices(
+            stock_price = get_yfinance_data(
                 tickers=codes,
                 start_date=start_date,
                 end_date=end_date,
             )
         else:
-            stock_price = get_yfinance_stock_prices(
+            stock_price = get_yfinance_data(
                 tickers=codes,
                 period=period,
                 interval=interval,
@@ -438,7 +463,9 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
         """Execute workflow."""
         # Get a logger.
         logger = self.logger
-        logger.info("Starting data ingestion workflow for JQuants.")
+        logger.info(
+            "Starting data ingestion workflow of stock prices via Yahoo Finance."
+        )
         # Get variables.
         logger.info("Retrieving workflow variables.")
         v = self.variables
@@ -511,6 +538,9 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
 
         stock_prices_df["ticker"] = stock_prices_df["ticker"].str.replace(".T", "0")
 
+        # Add metadata of data ingestion.
+        stock_prices_df = add_ingestion_metadata(stock_prices_df, v["ingestion_source"])
+
         # Validate dataframe against schema.
         logger.info("Apply dataframe validator for parsed dataframe")
         stock_prices_df_vaid = Validator.model_validate(v["schema_stock_price"]).valid(
@@ -533,6 +563,182 @@ class DataIngestionYFinanceStockPrice(WorkflowsRegistry, ExternalFileMixin):
                 ).mode(v["write_mode"]).save()
             else:
                 logger.error("No path defined for stock price!")
+
+        else:
+            raise NotImplementedError("other type not implemented yet!")
+
+
+class DataIngestionYFinanceMarketData(WorkflowsRegistry, ExternalFileMixin):
+    """Workflow for daily market data ingestion via Yahoo Finance.
+
+    Description: Market Data Ingestion via Yahoo Finance API.
+
+    Key methods
+    ----------
+    run: Abstract method.
+        Execute overall workflow. To be implemented at subclasses.
+    logger: set up a logger for workflow.
+    variables: Return variables of the workflow.
+    ----------
+
+    Variables
+    ----------
+    corp_codes: Corporate codes to ingest data for.
+        List[str] = None
+    start_date: Start date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    end_date: End date for data ingestion in 'YYYY-MM-DD' format.
+        str = None
+    period: If data ingestion done by a defined period.
+        str = None (i.e. 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
+    interval: If data ingestion done by a defined period, we can define the interval.
+        str = None (i.e. 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo)
+    format: Output format.
+        str = "df"
+    target_db: Folder or Database path to save the ingested data.
+        Optional[str] = None
+    target_path_market_data: Full file path to save the market data.
+        Optional[str] = None
+    write_mode: File write mode.
+        str = "overwrite"
+    schema_market_data: Output data schema of market data.
+        Optional[Dict] = Field(description="data_schema_market_data.", default=None)
+    ingestion_source: Data source.
+        str
+    ----------
+    """
+
+    # variables
+    wfclss: ClassVar[str] = "DataIngestionYFinanceMarketData"
+
+    kind: str = "DataIngestionYFinanceMarketData"
+    status: bool = True
+    corp_codes: List[str]
+    start_date: str = None
+    end_date: str = None
+    period: str = None
+    interval: str = None
+    format: str = "df"
+    target_db: Optional[str] = None
+    target_path_market_data: Optional[str] = None
+    write_mode: str = "overwrite"
+    schema_market_data: Optional[Dict] = Field(
+        description="data_schema_market_data.", default=None
+    )
+    ingestion_source: str
+
+    @field_validator("period", mode="before")
+    def _check_period(cls, value, valid_values):
+        if (
+            valid_values.data["start_date"] is not None
+            or valid_values.data["end_date"] is not None
+        ) and value is not None:
+            raise ValueError(
+                "If start_date & end_date are defined, period should be None."
+            )
+        return value
+
+    @field_validator("interval", mode="before")
+    def _check_interval(cls, value, valid_values):
+        if (
+            valid_values.data["start_date"] is not None
+            or valid_values.data["end_date"] is not None
+        ) and value is not None:
+            raise ValueError(
+                "If start_date & end_date are defined, interval should be None."
+            )
+        return value
+
+    def fetch_data(
+        self, codes, start_date=None, end_date=None, period=None, interval=None
+    ):
+        """Fetch data via Yahoo finance."""
+        if start_date is not None and end_date is not None:
+            data = get_yfinance_data(
+                tickers=codes,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        else:
+            data = get_yfinance_data(
+                tickers=codes,
+                period=period,
+                interval=interval,
+            )
+
+        return data
+
+    def run(self) -> None:
+        """Execute workflow."""
+        # Get a logger.
+        logger = self.logger
+        logger.info(
+            "Starting data ingestion workflow of market data via Yahoo Finance."
+        )
+        # Get variables.
+        logger.info("Retrieving workflow variables.")
+        v = self.variables
+
+        market_data_consolidated = []
+
+        if (
+            v["start_date"] is None
+            and v["end_date"] is None
+            and v["period"] is None
+            and v["interval"] is None
+        ):
+            logger.info(
+                "No start_date/end_date or period/interval defined, setting period to '1d'."
+            )
+            v["period"] = "1d"
+
+        logger.info(f"Fetching data for code: {v['corp_codes']}")
+        corp_lists = v["corp_codes"]
+        market_data = self.fetch_data(
+            corp_lists,
+            v["start_date"],
+            v["end_date"],
+            v["period"],
+            v["interval"],
+        )
+        market_data_consolidated.append(market_data)
+        time.sleep(1)  # To avoid hitting rate limits.
+
+        market_data_consolidated_df = pd.concat(
+            market_data_consolidated, ignore_index=True
+        )
+
+        if market_data_consolidated_df.empty:
+            logger.warning("No data fetched from Yahoo finance API.")
+            return
+
+        # Add metadata of data ingestion.
+        market_data_consolidated_df = add_ingestion_metadata(
+            market_data_consolidated_df, v["ingestion_source"]
+        )
+
+        # Validate dataframe against schema.
+        logger.info("Apply dataframe validator for parsed dataframe")
+        market_data_consolidated_df_vaid = Validator.model_validate(
+            v["schema_market_data"]
+        ).valid(market_data_consolidated_df)
+
+        # Output
+        if v["format"] == "df":
+            logger.info("Returning DataFrame format.")
+            return market_data_consolidated_df_vaid
+
+        elif v["format"] == "csv":
+            logger.info("Saving DataFrame to CSV format.")
+            if v["target_path_market_data"]:
+                SaveFile(
+                    df=market_data_consolidated_df_vaid,
+                    file_db=v["target_db"],
+                    file_path=v["target_path_market_data"],
+                    primary_keys=extract_primary_keys(v["schema_market_data"]),
+                ).mode(v["write_mode"]).save()
+            else:
+                logger.error("No path defined for market data!")
 
         else:
             raise NotImplementedError("other type not implemented yet!")

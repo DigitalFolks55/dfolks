@@ -9,3 +9,4 @@ target_db: "yf_data"  # If you want to store data into a specific root folder
 target_path_stock: "jp_stock_price.csv"  # File or table name
 write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
 schema_stock_price: "file://src/dfolks/schema/schema_yfinance_stock_price.yaml"  # Output dataframe schema
+ingestion_source: "Yahoo Finance"  # Data source for metadata

@@ -9,3 +9,4 @@ target_db: "jquants"  # If you want to store data into a specific root folder
 target_path_fin_report: "jp_fin_report.csv"  # File or table name
 write_mode: "upsert"  # overwrite, incremental, upsert, append, archive
 schema_fin_report: "file://src/dfolks/schema/schema_jquants_fin_report.yaml"  # Output dataframe schema
+ingestion_source: "JQuants"  # Data source for metadata
