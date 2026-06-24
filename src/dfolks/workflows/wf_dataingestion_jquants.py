@@ -18,7 +18,7 @@ from pydantic import Field, field_validator
 
 from dfolks.core.classfactory import WorkflowsRegistry
 from dfolks.core.mixin import ExternalFileMixin
-from dfolks.data.data import Validator
+from dfolks.data.data import Validator, add_ingestion_metadata
 from dfolks.data.jquants_apis import (
     get_jquants_api_key_v2,
     get_jquants_corporate_list_v2,
@@ -70,6 +70,8 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
         str = "overwrite"
     schema: Output data schema.
         Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: Data source.
+        str
     ----------
     """
 
@@ -77,6 +79,7 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
     wfclss: ClassVar[str] = "DataIngestionJQuantsFinReport"
 
     kind: str = "DataIngestionJQuantsFinReport"
+    status: bool = True
     corp_codes: List[str] = None
     corp_filter_col: str = None
     corp_filter: str = None
@@ -89,6 +92,7 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
     target_path_fin_report: Optional[str] = None
     write_mode: str = "overwrite"
     schema_fin_report: Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: str
 
     @field_validator("single_date", mode="before")
     def _check_single_date(cls, value, valid_values):
@@ -225,6 +229,9 @@ class DataIngestionJQuantsFinReport(WorkflowsRegistry, ExternalFileMixin):
             logger.warning("No data fetched from JQuants Fin Report API.")
             return
 
+        # Add metadata of data ingestion.
+        fin_reports_df = add_ingestion_metadata(fin_reports_df, v["ingestion_source"])
+
         # Validate dataframe against schema.
         df_valid = Validator.model_validate(v["schema_fin_report"]).valid(
             fin_reports_df
@@ -288,6 +295,8 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
         str = "overwrite"
     schema: Output data schema.
         Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: Data source.
+        str
     ----------
     """
 
@@ -295,6 +304,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
     wfclss: ClassVar[str] = "DataIngestionJQuantsStockPrice"
 
     kind: str = "DataIngestionJQuantsStockPrice"
+    status: bool = True
     corp_codes: List[str] = None
     corp_filter_col: str = None
     corp_filter: str = None
@@ -307,6 +317,7 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
     target_path_stock: Optional[str] = None
     write_mode: str = "overwrite"
     schema_stock_price: Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: str
 
     @field_validator("single_date", mode="before")
     def _check_single_date(cls, value, valid_values):
@@ -444,6 +455,9 @@ class DataIngestionJQuantsStockPrice(WorkflowsRegistry, ExternalFileMixin):
             logger.warning("No data fetched from JQuants Stock Price API.")
             return
 
+        # Add metadata of data ingestion.
+        stock_prices_df = add_ingestion_metadata(stock_prices_df, v["ingestion_source"])
+
         # Validate dataframe against schema.
         logger.info("Apply dataframe validator for parsed dataframe")
         df_valid = Validator.model_validate(v["schema_stock_price"]).valid(
@@ -509,6 +523,8 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
         str = "overwrite"
     schema: Output data schema.
         Optional[Dict] = Field(description="data_schema.", default=None)
+    ingestion_source: Data source.
+        str
     ----------
     """
 
@@ -516,6 +532,7 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
     wfclss: ClassVar[str] = "DataIngestionJQuantsIndustryReport"
 
     kind: str = "DataIngestionJQuantsIndustryReport"
+    status: bool = True
     section: str = None
     start_date: str = None
     end_date: str = None
@@ -527,6 +544,7 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
     schema_industry_report: Optional[Dict] = Field(
         description="data_schema.", default=None
     )
+    ingestion_source: str
 
     @field_validator("latest_data", mode="before")
     def _check_latest_data(cls, value, valid_values):
@@ -581,6 +599,11 @@ class DataIngestionJQuantsIndustryReport(WorkflowsRegistry, ExternalFileMixin):
         if industry_report_df.empty:
             logger.warning("No data fetched from JQuants Industry Report API.")
             return
+
+        # Add metadata of data ingestion.
+        industry_report_df = add_ingestion_metadata(
+            industry_report_df, v["ingestion_source"]
+        )
 
         # Validate dataframe against schema.
         logger.info("Apply dataframe validator for parsed dataframe")

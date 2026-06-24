@@ -324,3 +324,9 @@ schemas:
     nullable: false
     unique: false
     primary_key: false
+
+  "ingestion_source":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: false

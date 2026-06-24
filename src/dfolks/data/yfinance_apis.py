@@ -62,14 +62,14 @@ def get_yfinance_dividends(ticker: str) -> pd.DataFrame:
     return df
 
 
-def get_yfinance_stock_prices(
+def get_yfinance_data(
     tickers: list,
     period: str = None,
     interval: str = None,
     start_date: str = None,
     end_date: str = None,
 ) -> pd.DataFrame:
-    """Get yfinance Ticker stock prices."""
+    """Download yfinance Ticker data."""
     if period is not None and (start_date is not None and end_date is not None):
         raise ValueError(
             "If period provided then start_date or end_date is not required."

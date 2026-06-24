@@ -59,9 +59,7 @@ def mock_model_xbrl():
 
 
 def test_parse_edinet_xbrl(mock_model_xbrl):
-    parser = EdinetXbrlParser(
-        model_xbrl=mock_model_xbrl, ingestion_source="mock_file.xbrl"
-    )
+    parser = EdinetXbrlParser(model_xbrl=mock_model_xbrl, source_path="mock_file.xbrl")
     df = parser.parse()
 
     # --- Assertions ---
@@ -76,7 +74,7 @@ def test_parse_edinet_xbrl(mock_model_xbrl):
     assert df["Account standard"].iloc[0] == "Japan GAAP"
     assert df["Period start date"].iloc[0] == "2024-04-01"
     assert df["Period end date"].iloc[0] == "2025-03-31"
-    assert df["Ingestion source"].iloc[0] == "mock_file.xbrl"
+    assert df["source_path"].iloc[0] == "mock_file.xbrl"
 
     # Check numeric conversion
     assert pd.api.types.is_numeric_dtype(df["Net sales"])

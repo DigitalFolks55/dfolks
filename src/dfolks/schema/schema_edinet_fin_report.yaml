@@ -121,7 +121,13 @@ schemas:
     unique: false
     primary_key: false
 
-  "Ingestion source":
+  "source_path":
+    type: String
+    nullable: false
+    unique: false
+    primary_key: false
+
+  "ingestion_source":
     type: String
     nullable: false
     unique: false

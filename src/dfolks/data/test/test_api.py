@@ -15,6 +15,7 @@ import pandas as pd
 import pytest
 import yfinance as yf
 
+from dfolks.data.data import add_ingestion_metadata
 from dfolks.data.edinet_apis import (
     download_edinet_document,
     download_edinet_documents,
@@ -31,12 +32,52 @@ from dfolks.data.jquants_apis import (
 from dfolks.data.yfinance_apis import (
     get_yfinance_balance_sheet,
     get_yfinance_cash_flow,
+    get_yfinance_data,
     get_yfinance_dividends,
     get_yfinance_income_statement,
     get_yfinance_info,
-    get_yfinance_stock_prices,
     get_yfinance_ticker,
 )
+
+"""Data utility tests."""
+
+
+@patch("dfolks.data.data.datetime")
+def test_add_ingestion_metadata_adds_metadata_columns(mock_datetime):
+    fixed_time = datetime.datetime(2026, 6, 14, 10, 30, 45, 123456)
+    mock_datetime.now.return_value = fixed_time
+
+    df = pd.DataFrame({"ticker": ["AAPL", "MSFT"], "price": [195.0, 460.5]})
+    source = "yfinance"
+
+    result = add_ingestion_metadata(df, source)
+
+    assert list(result.columns) == [
+        "ticker",
+        "price",
+        "ingestion_datetime",
+        "ingestion_source",
+    ]
+    assert result["ticker"].to_list() == ["AAPL", "MSFT"]
+    assert result["price"].to_list() == [195.0, 460.5]
+    assert (result["ingestion_datetime"] == fixed_time.replace(microsecond=0)).all()
+    assert result["ingestion_source"].to_list() == [source, source]
+
+
+@patch("dfolks.data.data.datetime")
+def test_add_ingestion_metadata_does_not_modify_original_dataframe(mock_datetime):
+    mock_datetime.now.return_value = datetime.datetime(2026, 6, 14, 10, 30, 45)
+
+    df = pd.DataFrame({"ticker": ["AAPL"], "price": [195.0]})
+    original_df = df.copy()
+
+    result = add_ingestion_metadata(df, "manual")
+
+    pd.testing.assert_frame_equal(df, original_df)
+    assert result is not df
+    assert "ingestion_datetime" not in df.columns
+    assert "ingestion_source" not in df.columns
+
 
 """J-Quants API tests."""
 # Test: get_jquants_api_refresh_token
@@ -431,12 +472,12 @@ def mock_yfinance_download(func):
 
 
 @mock_yfinance_download
-def test_get_yfinance_stock_prices(monkeypatch):
+def test_get_yfinance_data(monkeypatch):
     ticker = "Test"
     start_date = "2025-01-01"
     end_date = "2025-01-31"
 
-    df = get_yfinance_stock_prices(ticker, start_date=start_date, end_date=end_date)
+    df = get_yfinance_data(ticker, start_date=start_date, end_date=end_date)
     expected_cols = ["date", "Open", "High", "Low", "ticker"]
 
     assert isinstance(df, pd.DataFrame)

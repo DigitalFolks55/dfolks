@@ -16,3 +16,4 @@ schema_income_statement: "file://src/dfolks/schema/schema_yfinance_income_statem
 schema_balance_sheet: "file://src/dfolks/schema/schema_yfinance_balance_sheet.yaml"  # Output dataframe schema
 schema_cash_flow: "file://src/dfolks/schema/schema_yfinance_cash_flow.yaml"  # Output dataframe schema
 schema_dividends: "file://src/dfolks/schema/schema_yfinance_dividends.yaml"  # Output dataframe schema
+ingestion_source: "Yahoo Finance"  # Data source for metadata

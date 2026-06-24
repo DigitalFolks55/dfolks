@@ -17,7 +17,7 @@ from pydantic import Field
 from dfolks.core.chain import ChainProcess
 from dfolks.core.classfactory import WorkflowsRegistry, load_class
 from dfolks.core.mixin import ExternalFileMixin
-from dfolks.data.data import Validator
+from dfolks.data.data import Validator, add_ingestion_metadata
 
 
 class DataIngestionWorkflow(WorkflowsRegistry, ExternalFileMixin):
@@ -47,11 +47,15 @@ class DataIngestionWorkflow(WorkflowsRegistry, ExternalFileMixin):
     validation: Optional[Dict] = Field(description="data_validation.", default=None)
         Variables for DataFrame validation.
         Refer to validation class.
+    ingestion_source: Data source.
+        str
     ----------
     """
 
     wfclss: ClassVar[str] = "DataIngestion"
 
+    kind: str = "DataIngestion"
+    status: bool = True
     format: Literal["df", "csv", "parquet"]
     target_db: Optional[str] = None
     target_output: Optional[str] = None
@@ -63,6 +67,7 @@ class DataIngestionWorkflow(WorkflowsRegistry, ExternalFileMixin):
         description="chain_for_data_processing.", default=None
     )
     validation: Optional[Dict] = Field(description="data_validation.", default=None)
+    ingestion_source: str
 
     @property
     def variables(self) -> Dict:
@@ -94,6 +99,9 @@ class DataIngestionWorkflow(WorkflowsRegistry, ExternalFileMixin):
         if v["retain_cols"]:
             logger.info("Retain required columns")
             df = df[v["retain_cols"]]
+
+        # Add metadata of data ingestion.
+        df = add_ingestion_metadata(df, v["ingestion_source"])
 
         # Validate DataFrame.
         if v["validation"]:

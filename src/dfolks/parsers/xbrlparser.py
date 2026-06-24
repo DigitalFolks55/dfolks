@@ -23,14 +23,14 @@ class EdinetXbrlParser(NormalClassRegistery):
     ----------
     model_xbrl: XBRL model.
         Any
-    ingestion_source: Source of ingestion, e.g. file name.
+    source_path: Source of ingestion, e.g. file name.
         str
     ----------
     """
 
     nmclss: ClassVar[str] = "EdinetXbrlParser"
     model_xbrl: Any
-    ingestion_source: str
+    source_path: str
 
     @property
     def variables(self) -> Dict:
@@ -213,7 +213,7 @@ class EdinetXbrlParser(NormalClassRegistery):
             values="value",
         ).reset_index()
 
-        df_pivot["Ingestion source"] = self.ingestion_source
+        df_pivot["source_path"] = self.source_path
 
         logger.info("Finished parsing XBRL file and pivoting DataFrame.")
 
